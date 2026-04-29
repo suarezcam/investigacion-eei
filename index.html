@@ -22,7 +22,41 @@
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{font-size:16px}
     body{font-family:'Source Sans 3',sans-serif;background:var(--white);color:var(--text);line-height:1.7;min-height:100vh;display:flex;flex-direction:column}
+    
+    @media print {
+  /* Ocultar todo */
+  header, main, footer, .modal-close, .modal-actions, .pdf-note { display: none !important; }
+  
+  /* Mostrar solo el modal abierto, sin overlay */
+  .modal-overlay.open {
+    position: static !important;
+    background: none !important;
+    padding: 0 !important;
+    display: block !important;
+  }
 
+  .modal {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 2rem !important;
+    max-width: 100% !important;
+  }
+
+  /* Mostrar campos como texto imprimible */
+  input, textarea, select {
+    border: none !important;
+    border-bottom: 1px solid #ccc !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: .25rem 0 !important;
+  }
+
+  /* Saltos de página limpios */
+  .form-group { page-break-inside: avoid; }
+}
+    
     /* HEADER */
     header{background:var(--navy);padding:2rem 3rem 0}
     .header-top{display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:1.5rem;border-bottom:1px solid rgba(200,223,245,.12)}
