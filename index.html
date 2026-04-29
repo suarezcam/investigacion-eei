@@ -264,42 +264,35 @@
         <h4>Gerardo A. Machuca</h4>
         <span>Director de Escuela</span>
         <span class="role-badge">Preside</span>
-        <a href="mailto:correo@poligran.edu.co" class="contact-link">✉ correo@poligran.edu.co</a>
+        <a href="mailto:gmachuca@poligran.edu.co" class="contact-link">✉ gmachuca@poligran.edu.co</a>
       </div>
       <div class="person-card">
         <div class="avatar">CS</div>
         <h4>Camila Suárez Acevedo</h4>
         <span>Coord. investigación de Escuela</span>
         <span class="role-badge">Coordinación</span>
-        <a href="mailto:correo@poligran.edu.co" class="contact-link">✉ correo@poligran.edu.co</a>
-      </div>
-      <div class="person-card">
-        <div class="avatar">YP</div>
-        <h4>Yury Estefanía Perdomo</h4>
-        <span>Coord. investigación de Facultad</span>
-        <span class="role-badge">Coordinación</span>
-        <a href="mailto:correo@poligran.edu.co" class="contact-link">✉ correo@poligran.edu.co</a>
+        <a href="mailto:gcasuarez@poligran.edu.co" class="contact-link">✉ gcasuarez@poligran.edu.co</a>
       </div>
       <div class="person-card">
         <div class="avatar">MR</div>
         <h4>Marcela Riveros</h4>
         <span>Lic. Ciencias Sociales</span>
         <span class="role-badge">Líder de programa</span>
-        <a href="mailto:correo@poligran.edu.co" class="contact-link">✉ correo@poligran.edu.co</a>
+        <a href="mailto:mriverosa@poligran.edu.co" class="contact-link">✉ mriverosa@poligran.edu.co</a>
       </div>
       <div class="person-card">
         <div class="avatar">MT</div>
         <h4>Magda Trujillo</h4>
         <span>Lic. Educación Infantil</span>
         <span class="role-badge">Líder de programa</span>
-        <a href="mailto:correo@poligran.edu.co" class="contact-link">✉ correo@poligran.edu.co</a>
+        <a href="mailto:mztrujillo@poligran.edu.co" class="contact-link">✉ mztrujillo@poligran.edu.co</a>
       </div>
       <div class="person-card">
         <div class="avatar">AM</div>
         <h4>Alexandra Monsalve</h4>
         <span>Lic. Educación Básica Primaria</span>
         <span class="role-badge">Líder de programa</span>
-        <a href="mailto:correo@poligran.edu.co" class="contact-link">✉ correo@poligran.edu.co</a>
+        <a href="mailto:jamonsalve@poligran.edu.co" class="contact-link">✉ jamonsalve@poligran.edu.co</a>
       </div>
     </div>
     <h3 class="sub">Funciones del comité</h3>
@@ -512,7 +505,7 @@
         <span class="eis-chip">📚 Área: Ciencias de la Educación</span>
       </div>
       <div>
-        <span style="font-size:.8rem;opacity:.7;display:block;margin-top:1rem">Líderes: Camila Suárez Acevedo · Jaime Castro</span>
+        <span style="font-size:.8rem;opacity:.7;display:block;margin-top:1rem">Líder: Camila Suárez Acevedo</span>
         <a href="https://scienti.minciencias.gov.co/gruplac/jsp/visualiza/visualizagr.jsp?nro=00000000020215" target="_blank" rel="noopener" class="gruplac-btn">🔗 Ver en GrupLAC</a>
       </div>
     </div>
@@ -684,7 +677,20 @@
     document.querySelectorAll('.tab-nav button').forEach(b => b.classList.remove('active'));
     document.getElementById('panel-' + id).classList.add('active');
     btn.classList.add('active');
+    // Guarda la pestaña en la URL sin recargar
+    history.replaceState(null, '', '#' + id);
   }
+
+  // Al cargar, lee el hash de la URL y activa la pestaña correspondiente
+  (function() {
+    const hash = window.location.hash.replace('#', '');
+    const validTabs = ['eei', 'comite', 'proyectos', 'semilleros', 'grupo', 'publicaciones'];
+    if (hash && validTabs.includes(hash)) {
+      const btn = document.querySelector(`.tab-nav button[onclick="showTab('${hash}',this)"]`);
+      if (btn) showTab(hash, btn);
+    }
+  })();
+  
   function openModal(id) {
     document.getElementById(id).classList.add('open');
     document.body.style.overflow = 'hidden';
