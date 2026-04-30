@@ -829,7 +829,10 @@
       if (btn) showTab(hash, btn);
     }
   })();
-  
+    function toggleAcuerdo(header) {
+    const item = header.parentElement;
+    item.classList.toggle('open');
+  }
   function openModal(id) {
     document.getElementById(id).classList.add('open');
     document.body.style.overflow = 'hidden';
