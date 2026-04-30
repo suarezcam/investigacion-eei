@@ -848,12 +848,17 @@
         <label>Objetivo del semillero *</label>
         <textarea id="sem-objetivo" placeholder="Describe el objetivo principal del semillero..."></textarea>
       </div>
-      <div class="form-group">
-        <label>Justificación *</label>
-        <textarea id="sem-justificacion" placeholder="Describe cómo el semillero aporta al plan de estudios del programa e indica los aportes al campo de conocimiento..."></textarea>
-      </div>
+      <div class="form-group"><label>Justificación *</label>
+      <textarea id="sem-justificacion" placeholder="Describe cómo el semillero aporta al plan de estudios del programa e indica los aportes al campo de conocimiento..."></textarea>
     </div>
 
+    <div class="pdf-note">💡 Para guardar este formulario como PDF: menú del navegador → Imprimir → Guardar como PDF.</div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="window.print()">🖨️ Guardar como PDF</button>
+      <button class="btn-secondary" onclick="closeModal('modal-semillero')">Cerrar</button>
+    </div>
+  </div>
+</div>
     <!-- VISTA IMPRESIÓN: layout tipo PPT -->
     <div class="sem-print-view">
       <div class="sem-print-view">
