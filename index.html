@@ -220,6 +220,25 @@
     .pdf-note{background:var(--light);border-radius:.5rem;padding:.75rem 1rem;font-size:.8rem;color:var(--muted);margin-top:1rem;border-left:3px solid var(--accent)}
     .modal-actions{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--mist)}
 
+        /* FORMULARIO SEMILLERO PRINT */
+    .sem-print-view { display: none; }
+    .spm-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 700; color: var(--navy); text-align: center; margin-bottom: .4rem; }
+    .spm-subtitle { font-size: .9rem; color: var(--accent); text-align: center; font-weight: 600; letter-spacing: .05em; margin-bottom: 2rem; }
+    .spm-body { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+    .spm-left, .spm-center, .spm-right { display: flex; flex-direction: column; gap: .75rem; }
+    .spm-block { background: var(--light); border-radius: .5rem; padding: .75rem 1rem; }
+    .spm-block-label { font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: .3rem; }
+    .spm-block-value { font-size: .85rem; color: var(--navy); line-height: 1.5; }
+    .spm-arrow { text-align: center; color: var(--accent); font-size: 1.2rem; }
+    .spm-footer { font-size: .7rem; color: var(--muted); text-align: center; border-top: 1px solid var(--mist); padding-top: .75rem; }
+    
+    @media print {
+      .sem-form-screen, .modal-close, .modal-actions, .pdf-note, .modal-sub, .modal > h3 { display: none !important; }
+      .sem-print-view { display: block !important; }
+      .modal-overlay.open { position: static !important; background: none !important; display: block !important; }
+      .modal { box-shadow: none !important; border-radius: 0 !important; max-height: none !important; overflow: visible !important; padding: 2rem !important; max-width: 100% !important; }
+    }
+    
     /* FOOTER */
     footer{background:var(--navy);color:rgba(200,223,245,.6);text-align:center;padding:1.5rem 2rem;font-size:.8rem}
     footer strong{color:var(--mist)}
@@ -709,6 +728,11 @@
 <!-- MODAL FORMULARIO PROYECTO -->
 <div id="modal-proyecto" class="modal-overlay" onclick="closeModalOutside(event,'modal-proyecto')">
   <div class="modal">
+    <div style="margin-bottom:1.25rem">
+  <img src="IDENTIFICADOR_ESCUELA_DE_EDUCACION_E_INNOVACION_COLOR.png" 
+       alt="Escuela de Educación e Innovación" 
+       style="height:50px;object-fit:contain"/>
+  </div>
     <button class="modal-close" onclick="closeModal('modal-proyecto')">✕</button>
     <h3>Presentación de proyecto de investigación</h3>
     <p class="modal-sub">Comité de Investigación · Escuela de Educación e Innovación · EEI</p>
@@ -767,43 +791,115 @@
 
 <!-- MODAL FORMULARIO SEMILLERO -->
 <div id="modal-semillero" class="modal-overlay" onclick="closeModalOutside(event,'modal-semillero')">
-  <div class="modal">
+  <div class="modal" id="semillero-form-content">
     <button class="modal-close" onclick="closeModal('modal-semillero')">✕</button>
     <h3>Apertura de semillero de investigación</h3>
     <p class="modal-sub">Comité de Investigación · Escuela de Educación e Innovación · EEI</p>
 
-    <div class="form-section-label">1. Identificación del semillero</div>
-    <div class="form-group"><label>Nombre del semillero *</label><input type="text" placeholder="Propón un nombre para el semillero"/></div>
-    <div class="form-row">
-      <div class="form-group"><label>Escuela *</label><input type="text" value="Escuela de Educación e Innovación" readonly style="background:var(--light)"/></div>
-      <div class="form-group"><label>Programa académico *</label><input type="text" placeholder="Ej. Lic. en Educación Infantil"/></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Nombre del líder *</label><input type="text" placeholder="Nombre completo del docente líder"/></div>
-      <div class="form-group"><label>Correo de contacto *</label><input type="email" placeholder="correo@poligran.edu.co"/></div>
+    <!-- VISTA PANTALLA: formulario editable -->
+    <div class="sem-form-screen">
+      <div class="form-group">
+        <label>Nombre del semillero *</label>
+        <input type="text" id="sem-nombre" placeholder="Nombre del semillero"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Escuela *</label>
+          <input type="text" id="sem-escuela" value="Escuela de Educación e Innovación" readonly style="background:var(--light)"/>
+        </div>
+        <div class="form-group">
+          <label>Programa académico *</label>
+          <input type="text" id="sem-programa" placeholder="Ej. Lic. en Educación Infantil"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Líder *</label>
+          <input type="text" id="sem-lider" placeholder="Nombre completo del docente líder"/>
+        </div>
+        <div class="form-group">
+          <label>ODS al que impacta *</label>
+          <input type="text" id="sem-ods" placeholder="Ej. ODS 4 — Educación de calidad"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Grupo de investigación *</label>
+          <input type="text" id="sem-grupo" value="Educación, Innovación y Sociedad (EIS)" readonly style="background:var(--light)"/>
+        </div>
+        <div class="form-group">
+          <label>Línea de investigación *</label>
+          <select id="sem-linea">
+            <option value="">Selecciona...</option>
+            <option>Educación y Ciencias Sociales</option>
+            <option>Educación inicial, infancias y ruralidad</option>
+            <option>Educación STEM, pensamiento científico y apropiación de la ciencia</option>
+            <option>Innovación educativa, gestión y oportunidades</option>
+            <option>Comunicación, cultura y estética</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Objetivo del semillero *</label>
+        <textarea id="sem-objetivo" placeholder="Describe el objetivo principal del semillero..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Justificación *</label>
+        <textarea id="sem-justificacion" placeholder="Describe cómo el semillero aporta al plan de estudios del programa e indica los aportes al campo de conocimiento..."></textarea>
+      </div>
     </div>
 
-    <div class="form-section-label">2. Articulación académica</div>
-    <div class="form-group"><label>Grupo de investigación *</label><input type="text" value="Educación, Innovación y Sociedad (EIS)" readonly style="background:var(--light)"/></div>
-    <div class="form-group"><label>Línea de investigación a la que alimentaría *</label>
-      <select><option value="">Selecciona...</option><option>Educación y Ciencias Sociales</option><option>Educación inicial, infancias y ruralidad</option><option>Educación STEM, pensamiento científico y apropiación de la ciencia</option><option>Innovación educativa, gestión y oportunidades</option><option>Comunicación, cultura y estética</option></select>
+    <!-- VISTA IMPRESIÓN: layout tipo PPT -->
+    <div class="sem-print-view">
+      <div class="sem-print-view">
+  <div style="margin-bottom:1.25rem">
+    <img src="IDENTIFICADOR_ESCUELA_DE_EDUCACION_E_INNOVACION_COLOR.png"
+         alt="Escuela de Educación e Innovación"
+         style="height:55px;object-fit:contain"/>
+  </div>
+      <div class="spm-title" id="print-nombre">Nombre del semillero</div>
+      <div class="spm-subtitle" id="print-escuela-programa">Escuela de Educación e Innovación</div>
+
+      <div class="spm-body">
+        <div class="spm-left">
+          <div class="spm-block">
+            <div class="spm-block-label">ODS</div>
+            <div class="spm-block-value" id="print-ods">—</div>
+          </div>
+          <div class="spm-block">
+            <div class="spm-block-label">Objetivo</div>
+            <div class="spm-block-value" id="print-objetivo">—</div>
+          </div>
+        </div>
+        <div class="spm-center">
+          <div class="spm-block">
+            <div class="spm-block-label">Grupo</div>
+            <div class="spm-block-value" id="print-grupo">Educación, Innovación y Sociedad (EIS)</div>
+          </div>
+          <div class="spm-arrow">↓</div>
+          <div class="spm-block">
+            <div class="spm-block-label">Línea</div>
+            <div class="spm-block-value" id="print-linea">—</div>
+          </div>
+        </div>
+        <div class="spm-right">
+          <div class="spm-block">
+            <div class="spm-block-label">Líder</div>
+            <div class="spm-block-value" id="print-lider">—</div>
+          </div>
+          <div class="spm-arrow">↓</div>
+          <div class="spm-block">
+            <div class="spm-block-label">Justificación</div>
+            <div class="spm-block-value" id="print-justificacion">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="spm-footer">POLI.EDU.CO · Escuela de Educación e Innovación · Recurso elaborado por Camila Suárez Acevedo © 2026</div>
     </div>
-    <div class="form-group"><label>ODS al que impacta el semillero *</label><input type="text" placeholder="Ej. ODS 4 — Educación de calidad. Consulta: https://sdgs.un.org/es/goals"/></div>
 
-    <div class="form-section-label">3. Propuesta</div>
-    <div class="form-group"><label>Objetivo del semillero *</label><textarea placeholder="Describe el objetivo principal del semillero..."></textarea></div>
-    <div class="form-group"><label>Justificación *</label><textarea placeholder="Describe cómo el semillero aporta al plan de estudios del programa al que se adscribe e indica los aportes al campo de conocimiento..."></textarea></div>
-    <div class="form-group"><label>Proyección del plan de trabajo</label><textarea placeholder="Describe brevemente las actividades, metas y cronograma proyectados para el semillero..."></textarea></div>
-
-    <div class="form-section-label">4. Verificación previa</div>
-    <div class="form-group"><label>¿Revisaste los semilleros existentes en tu programa?</label>
-      <select><option value="">Selecciona...</option><option>Sí — no existe uno con este enfoque</option><option>Sí — existe uno similar, pero el presente lo complementa</option><option>No he verificado aún</option></select>
-    </div>
-    <div class="form-group"><label>Observaciones adicionales</label><textarea placeholder="Cualquier información adicional relevante para el comité..."></textarea></div>
-
-    <div class="pdf-note">💡 Para guardar este formulario como PDF: menú del navegador → Imprimir → Guardar como PDF.</div>
+    <div class="pdf-note">💡 Completa los campos arriba, luego haz clic en "Generar PDF" para previsualizar e imprimir.</div>
     <div class="modal-actions">
-      <button class="btn-primary" onclick="window.print()">🖨️ Guardar como PDF</button>
+      <button class="btn-primary" onclick="generarPDFSemillero()">🖨️ Generar PDF</button>
       <button class="btn-secondary" onclick="closeModal('modal-semillero')">Cerrar</button>
     </div>
   </div>
@@ -835,6 +931,19 @@
   function openModal(id) {
     document.getElementById(id).classList.add('open');
     document.body.style.overflow = 'hidden';
+  }
+  function generarPDFSemillero() {
+  const get = id => document.getElementById(id);
+  const programa = get('sem-programa').value || '—';
+  get('print-nombre').textContent     = get('sem-nombre').value       || 'Nombre del semillero';
+  get('print-escuela-programa').textContent = `Escuela de Educación e Innovación · ${programa}`;
+  get('print-ods').textContent        = get('sem-ods').value          || '—';
+  get('print-objetivo').textContent   = get('sem-objetivo').value     || '—';
+  get('print-grupo').textContent      = get('sem-grupo').value        || '—';
+  get('print-linea').textContent      = get('sem-linea').value        || '—';
+  get('print-lider').textContent      = get('sem-lider').value        || '—';
+  get('print-justificacion').textContent = get('sem-justificacion').value || '—';
+  window.print();
   }
   function closeModal(id) {
     document.getElementById(id).classList.remove('open');
