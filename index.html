@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Investigación en la EEI</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+  
   <style>
     :root {
       --navy:        #0D2340;
@@ -91,24 +93,6 @@
     .principle .icon{font-size:1.8rem;margin-bottom:.75rem}
     .principle h3{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;margin-bottom:.4rem}
     .principle p{font-size:.88rem;opacity:.8}
-
-    /* ACORDEONES NOVEDADES */
-    .novedades { display: flex; flex-direction: column; gap: .75rem; margin-top: 1rem; }
-    .acuerdo { background: #fff; border: 1px solid var(--mist); border-radius: .75rem; overflow: hidden; }
-    .acuerdo-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; cursor: pointer; gap: 1rem; transition: background .2s; }
-    .acuerdo-header:hover { background: var(--light); }
-    .acuerdo-header .ac-meta { display: flex; align-items: center; gap: .75rem; }
-    .acuerdo-header .ac-fecha { font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; background: var(--accent-light); color: var(--accent); padding: .2rem .7rem; border-radius: 1rem; white-space: nowrap; }
-    .acuerdo-header .ac-titulo { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; color: var(--navy); }
-    .acuerdo-header .ac-chevron { color: var(--muted); font-size: .85rem; transition: transform .25s; flex-shrink: 0; }
-    .acuerdo.open .ac-chevron { transform: rotate(180deg); }
-    .acuerdo-body { display: none; padding: 0 1.25rem 1.25rem; border-top: 1px solid var(--mist); }
-    .acuerdo.open .acuerdo-body { display: block; }
-    .acuerdo-body .ac-section { margin-top: 1rem; }
-    .acuerdo-body .ac-section-title { font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--sky); margin-bottom: .4rem; }
-    .acuerdo-body ul { padding-left: 1.2rem; font-size: .9rem; color: var(--muted); }
-    .acuerdo-body ul li { margin-bottom: .3rem; }
-
     
     /* CARDS */
     .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.25rem}
@@ -251,6 +235,22 @@
       .form-row{grid-template-columns:1fr}
       .modal{padding:1.75rem}
     }
+        /* ACORDEONES NOVEDADES */
+      .novedades { display: flex; flex-direction: column; gap: .75rem; margin-top: 1rem; }
+      .acuerdo { background: #fff; border: 1px solid var(--mist); border-radius: .75rem; overflow: hidden; }
+      .acuerdo-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; cursor: pointer; gap: 1rem; transition: background .2s; }
+      .acuerdo-header:hover { background: var(--light); }
+      .acuerdo-header .ac-meta { display: flex; align-items: center; gap: .75rem; }
+      .acuerdo-header .ac-fecha { font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; background: var(--accent-light); color: var(--accent); padding: .2rem .7rem; border-radius: 1rem; white-space: nowrap; }
+      .acuerdo-header .ac-titulo { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; color: var(--navy); }
+      .acuerdo-header .ac-chevron { color: var(--muted); font-size: .85rem; transition: transform .25s; flex-shrink: 0; }
+      .acuerdo.open .ac-chevron { transform: rotate(180deg); }
+      .acuerdo-body { display: none; padding: 0 1.25rem 1.25rem; border-top: 1px solid var(--mist); }
+      .acuerdo.open .acuerdo-body { display: block; }
+      .acuerdo-body .ac-section { margin-top: 1rem; }
+      .acuerdo-body .ac-section-title { font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--sky); margin-bottom: .4rem; }
+      .acuerdo-body ul { padding-left: 1.2rem; font-size: .9rem; color: var(--muted); }
+      .acuerdo-body ul li { margin-bottom: .3rem; }
   </style>
 </head>
 <body>
@@ -387,64 +387,66 @@
       <li>Aseguran el cumplimiento de parámetros del CNA, Minciencias y MEN.</li>
     </ul>
   </div>
-    <h3 class="sub">Novedades — Memoria de reuniones 2026</h3>
-    <div class="novedades">
-    
-      <!-- REUNIÓN 1 — copia este bloque para agregar más -->
-      <div class="acuerdo">
-        <div class="acuerdo-header" onclick="toggleAcuerdo(this)">
-          <div class="ac-meta">
-            <span class="ac-fecha">15 Abr 2026</span>
-            <span class="ac-titulo">Reunión de comité — Abril</span>
-          </div>
-          <span class="ac-chevron">▼</span>
-        </div>
-        <div class="acuerdo-body">
-          <div class="ac-section">
-            <div class="ac-section-title">Temas tratados</div>
-            <ul>
-              <li>Revisión del estado de proyectos en curso registrados en SIGIIP.</li>
-              <li>Socialización de convocatoria interna vigente y fechas límite.</li>
-              <li>Seguimiento a semilleros activos del primer semestre.</li>
-            </ul>
-          </div>
-          <div class="ac-section">
-            <div class="ac-section-title">Decisiones y acuerdos</div>
-            <ul>
-              <li>Se aprobó la vinculación del semillero <em>Infancias rurales</em> a la convocatoria.</li>
-              <li>Se acordó solicitar reporte de avances a investigadores principales antes del 30 de abril.</li>
-            </ul>
-          </div>
-        </div>
+ <h3 class="sub">Novedades — Memoria de reuniones 2026</h3>
+<div class="novedades">
+
+  <!-- REUNIÓN 1 — copia este bloque para agregar más -->
+  <div class="acuerdo">
+    <div class="acuerdo-header" onclick="toggleAcuerdo(this)">
+      <div class="ac-meta">
+        <span class="ac-fecha">15 Abr 2026</span>
+        <span class="ac-titulo">Reunión de comité — Abril</span>
       </div>
-    
-      <!-- REUNIÓN 2 -->
-      <div class="acuerdo">
-        <div class="acuerdo-header" onclick="toggleAcuerdo(this)">
-          <div class="ac-meta">
-            <span class="ac-fecha">18 Mar 2026</span>
-            <span class="ac-titulo">Reunión de comité — Marzo</span>
-          </div>
-          <span class="ac-chevron">▼</span>
-        </div>
-        <div class="acuerdo-body">
-          <div class="ac-section">
-            <div class="ac-section-title">Temas tratados</div>
-            <ul>
-              <li>Presentación del plan de investigaciones del primer semestre 2026.</li>
-              <li>Revisión de metas institucionales y asignación de responsables por programa.</li>
-            </ul>
-          </div>
-          <div class="ac-section">
-            <div class="ac-section-title">Decisiones y acuerdos</div>
-            <ul>
-              <li>Se definieron fechas de socialización de proyectos nuevos para abril.</li>
-              <li>Se asignó al líder de cada programa el seguimiento de trabajos de grado vinculados.</li>
-            </ul>
-          </div>
-        </div>
+      <span class="ac-chevron">▼</span>
+    </div>
+    <div class="acuerdo-body">
+      <div class="ac-section">
+        <div class="ac-section-title">Temas tratados</div>
+        <ul>
+          <li>Revisión del estado de proyectos en curso registrados en SIGIIP.</li>
+          <li>Socialización de convocatoria interna vigente y fechas límite.</li>
+          <li>Seguimiento a semilleros activos del primer semestre.</li>
+        </ul>
+      </div>
+      <div class="ac-section">
+        <div class="ac-section-title">Decisiones y acuerdos</div>
+        <ul>
+          <li>Se aprobó la vinculación del semillero <em>Infancias rurales</em> a la convocatoria.</li>
+          <li>Se acordó solicitar reporte de avances a investigadores principales antes del 30 de abril.</li>
+        </ul>
       </div>
     </div>
+  </div>
+
+  <!-- REUNIÓN 2 -->
+  <div class="acuerdo">
+    <div class="acuerdo-header" onclick="toggleAcuerdo(this)">
+      <div class="ac-meta">
+        <span class="ac-fecha">18 Mar 2026</span>
+        <span class="ac-titulo">Reunión de comité — Marzo</span>
+      </div>
+      <span class="ac-chevron">▼</span>
+    </div>
+    <div class="acuerdo-body">
+      <div class="ac-section">
+        <div class="ac-section-title">Temas tratados</div>
+        <ul>
+          <li>Presentación del plan de investigaciones del primer semestre 2026.</li>
+          <li>Revisión de metas institucionales y asignación de responsables por programa.</li>
+        </ul>
+      </div>
+      <div class="ac-section">
+        <div class="ac-section-title">Decisiones y acuerdos</div>
+        <ul>
+          <li>Se definieron fechas de socialización de proyectos nuevos para abril.</li>
+          <li>Se asignó al líder de cada programa el seguimiento de trabajos de grado vinculados.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+    
 
   <!-- PANEL 3: PROYECTOS -->
   <div id="panel-proyectos" class="panel">
