@@ -897,16 +897,26 @@
     document.getElementById(id).classList.add('open');
     document.body.style.overflow = 'hidden';
   }
-  function imprimirFormularioSemillero() {
-    const campos = document.querySelectorAll('#modal-semillero input, #modal-semillero textarea, #modal-semillero select');
-    campos.forEach(campo => {
-      const valor = campo.value || '—';
-      const span = document.createElement('span');
-      span.className = 'print-valor';
-      span.textContent = valor;
-      campo.parentNode.insertBefore(span, campo.nextSibling);
-      campo.style.display = 'none';
+ function imprimirFormularioSemillero() {
+  const campos = document.querySelectorAll('#modal-semillero input, #modal-semillero textarea, #modal-semillero select');
+  campos.forEach(campo => {
+    const valor = campo.value || '—';
+    const span = document.createElement('span');
+    span.className = 'print-valor';
+    span.textContent = valor;
+    campo.parentNode.insertBefore(span, campo.nextSibling);
+    campo.style.display = 'none';
+  });
+
+  setTimeout(() => {
+    window.print();
+    // Restaura después de imprimir
+    document.querySelectorAll('#modal-semillero .print-valor').forEach(s => s.remove());
+    document.querySelectorAll('#modal-semillero input, #modal-semillero textarea, #modal-semillero select').forEach(c => {
+      c.style.display = '';
     });
+  }, 300);
+}
     window.print();
     // Restaura los campos después de imprimir
     document.querySelectorAll('#modal-semillero .print-valor').forEach(s => s.remove());
