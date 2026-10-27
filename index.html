@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Investigación en la EEI</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<style>
+/* Concepto: sitio de orientación con barra de pestañas fija, un elemento interactivo distinto por sección (volteo, línea de tiempo, paso a paso, filtros, buscador, contadores) y la paleta navy, azul, cielo y violeta de la versión original. */
+:root{
+  --navy:#0D2340; --blue:#1B4F8A; --sky:#3A85C8; --mist:#C8DFF5; --light:#EEF5FC;
+  --accent:#8B5CF6; --accent-strong:#7B4BE6; --accent-ink:#6D3FD6; --accent-soft:#EDE9FE; --accent-mid:#C4B5FD;
+  --bg:#FAFCFF; --surface:#FFFFFF; --fg:#0D2340; --muted:#476482; --line:#C8DFF5; --soft:#EEF5FC;
+  --link:#1B4F8A; --on-bg:#0D2340; --dark-btn:#0D2340; --shadow:0 10px 28px rgba(13,35,64,.10);
+  --head:'Source Serif 4',Georgia,'Times New Roman',serif;
+  --body:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --navy:#081426; --bg:#0A1830; --surface:#11264A; --fg:#E8EFF8; --muted:#A8BCD3; --line:#24426C; --soft:#0E2140;
+  --link:#8EBDEB; --on-bg:#7B4BE6; --dark-btn:#1B4F8A; --accent-ink:#C4B5FD; --accent-soft:#2B2358; --accent-mid:#6B54B8;
+  --shadow:0 10px 28px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --navy:#081426; --bg:#0A1830; --surface:#11264A; --fg:#E8EFF8; --muted:#A8BCD3; --line:#24426C; --soft:#0E2140;
+  --link:#8EBDEB; --on-bg:#7B4BE6; --dark-btn:#1B4F8A; --accent-ink:#C4B5FD; --accent-soft:#2B2358; --accent-mid:#6B54B8;
+  --shadow:0 10px 28px rgba(0,0,0,.35); color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+html{font-size:17px;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:1rem;line-height:1.65;min-height:100vh;display:flex;flex-direction:column}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--navy);z-index:60}
+.wrap{width:100%;max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+a{color:var(--link)}
+svg.ic{flex-shrink:0;display:block}
+
+/* Cabecera */
+.masthead{background:var(--navy);color:#fff;padding-block:1.7rem .6rem}
+.brand-label{font-size:.78rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-mid)}
+.brand-title{font-family:var(--head);font-size:clamp(1.7rem,3.4vw,2.3rem);font-weight:600;line-height:1.15;margin:.2rem 0 .15rem}
+.brand-sub{font-size:.95rem;color:rgba(200,223,245,.8)}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--navy);border-bottom:1px solid rgba(200,223,245,.14)}
+.tabs .wrap{display:flex;overflow-x:auto;scrollbar-width:none}
+.tabs .wrap::-webkit-scrollbar{display:none}
+.tab{background:none;border:0;border-bottom:3px solid transparent;cursor:pointer;padding:.95rem 1.15rem;font-size:.82rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(200,223,245,.78);white-space:nowrap;transition:color .2s,border-color .2s}
+.tab:hover{color:#fff}
+.tab[aria-selected="true"]{color:#fff;border-bottom-color:var(--accent)}
+.progress{position:absolute;left:0;top:0;height:3px;width:100%;background:var(--accent);transform-origin:left;transform:scaleX(0)}
+
+main{flex:1;padding-block:2.75rem 4.5rem}
+.panel{display:none}
+.panel.active{display:block;animation:rise .35s ease}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.eyebrow{font-size:.78rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);margin:0}
+h2.title{font-family:var(--head);font-size:clamp(1.9rem,4.2vw,2.9rem);line-height:1.15;font-weight:600;margin:.35rem 0 .8rem;text-wrap:balance}
+h2.title em{color:var(--link);font-style:italic}
+.lede{color:var(--muted);max-width:64ch;font-size:1.06rem;margin:0}
+h3.sub{font-family:var(--head);font-size:1.5rem;font-weight:600;line-height:1.25;margin:3.25rem 0 1rem;text-wrap:balance}
+h3.sub.first{margin-top:2.25rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.25rem}
+
+/* Botones y chips */
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.25rem;border-radius:999px;border:0;font-weight:600;font-size:.95rem;cursor:pointer;text-decoration:none;transition:transform .2s,box-shadow .2s,background .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:var(--accent-strong);color:#fff}
+.btn-primary:hover{box-shadow:0 8px 20px rgba(123,75,230,.35)}
+.btn-dark{background:var(--dark-btn);color:#fff}
+.btn-ghost{background:var(--soft);color:var(--fg);border:1px solid var(--line)}
+.btn[disabled]{opacity:.45;cursor:default;transform:none}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:.4rem .95rem;border-radius:999px;font-size:.9rem;font-weight:500;cursor:pointer;transition:background .2s,color .2s}
+.chip:hover{background:var(--soft)}
+.chip[aria-pressed="true"]{background:var(--on-bg);color:#fff;border-color:var(--on-bg)}
+.tag{display:inline-block;font-size:.8rem;font-weight:600;padding:.15rem .65rem;border-radius:999px;background:var(--soft);color:var(--link);border:1px solid var(--line)}
+.tag.violet{background:var(--accent-soft);color:var(--accent-ink);border-color:transparent}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--link);cursor:pointer}
+.icon-btn:hover{background:var(--soft)}
+.icon-btn[disabled]{opacity:.4;cursor:default}
+.email{display:flex;align-items:center;gap:.5rem;font-size:.88rem;color:var(--link);min-width:0}
+.email span{overflow-wrap:anywhere;user-select:all}
+
+/* Panel 1 */
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:2.5rem;align-items:end}
+.quick{display:grid;gap:.6rem}
+.quick button{display:flex;align-items:center;justify-content:space-between;gap:1rem;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.8rem 1rem;cursor:pointer;transition:border-color .2s,transform .2s}
+.quick button:hover{border-color:var(--accent);transform:translateX(4px)}
+.quick small{display:block;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink);font-weight:600}
+.quick strong{font-family:var(--head);font-size:1.1rem;font-weight:600}
+.principles{margin-top:2.75rem;background:var(--navy);color:#fff;border-radius:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:hidden}
+.principle{padding:1.75rem}
+.principle+.principle{border-left:1px solid rgba(200,223,245,.16)}
+.principle .badge{width:42px;height:42px;border-radius:50%;background:rgba(196,181,253,.18);color:var(--accent-mid);display:flex;align-items:center;justify-content:center;margin-bottom:.9rem}
+.principle h3{font-family:var(--head);font-size:1.3rem;font-weight:600;margin:0 0 .35rem}
+.principle p{margin:0;color:rgba(255,255,255,.84);font-size:.97rem}
+.check-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:.75rem}
+.check-list li{display:flex;gap:.75rem;align-items:flex-start;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:.85rem 1rem}
+.check-list .tick{color:var(--accent-ink);margin-top:.2rem}
+.meta-layout{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:1.25rem;align-items:start}
+.meta-list{display:grid;gap:.5rem}
+.meta-list button{display:flex;align-items:center;gap:.8rem;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.85rem 1rem;cursor:pointer;font-weight:600;font-size:1rem;transition:background .2s}
+.meta-list button:hover{background:var(--soft)}
+.meta-list button[aria-selected="true"]{background:var(--on-bg);color:#fff;border-color:var(--on-bg)}
+.meta-detail{padding:1.75rem;min-height:220px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px)}
+.meta-detail h4{font-family:var(--head);font-size:1.6rem;font-weight:600;margin:.4rem 0 .7rem;line-height:1.2}
+.meta-detail p.txt{font-size:1.1rem;margin:0 0 1.25rem}
+.meta-nav{display:flex;gap:.5rem;align-items:center}
+.meta-nav span{font-size:.88rem;color:var(--muted);margin-left:.4rem}
+
+/* Panel 2 */
+.flip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem}
+.flip{perspective:1000px;height:236px}
+.flip-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .55s}
+.flip.flipped .flip-inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1.2rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.35rem;transition:visibility 0s .27s}
+.face.back{transform:rotateY(180deg);visibility:hidden;justify-content:center;background:var(--soft)}
+.flip.flipped .front{visibility:hidden}
+.flip.flipped .back{visibility:visible}
+.avatar{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--sky));color:#fff;font-family:var(--head);font-size:1.25rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:.35rem}
+.face h4{font-family:var(--head);font-size:1.08rem;font-weight:600;margin:0;line-height:1.25}
+.face .role{font-size:.88rem;color:var(--muted);line-height:1.35}
+.face .btn{margin-top:auto;padding:.45rem 1rem;font-size:.85rem}
+.timeline{list-style:none;margin:1.25rem 0 0 .6rem;padding:0 0 0 1.5rem;border-left:2px solid var(--line);display:grid;gap:1rem}
+.tl{position:relative}
+.tl::before{content:"";position:absolute;left:calc(-1.5rem - 7px);top:1.35rem;width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--bg)}
+.tl-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;width:100%;background:none;border:0;padding:1rem 1.15rem;cursor:pointer;text-align:left}
+.tl-head:hover{background:var(--soft)}
+.tl-meta{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .75rem;min-width:0}
+.tl-date{font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent-ink);padding:.2rem .7rem;border-radius:999px;white-space:nowrap}
+.tl-title{font-family:var(--head);font-size:1.12rem;font-weight:600;line-height:1.3}
+.tl .card{padding:0;overflow:hidden}
+.tl-chev{transition:transform .25s;color:var(--muted)}
+.tl.open .tl-chev{transform:rotate(180deg)}
+.tl-body{padding:0 1.15rem 1.15rem;border-top:1px solid var(--line)}
+.tl-sec{margin-top:1rem}
+.tl-sec h5{margin:0 0 .35rem;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--link);font-weight:700}
+.tl-sec ul{margin:0;padding-left:1.2rem;color:var(--muted)}
+.tl-sec li{margin-bottom:.35rem}
+.empty{color:var(--muted);padding:1rem 0}
+
+/* Panel 3 */
+.stepper{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:1.25rem;align-items:start}
+.steps-nav{list-style:none;margin:0;padding:0;display:grid;gap:.5rem}
+.steps-nav button{display:flex;align-items:center;gap:.85rem;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.75rem .9rem;cursor:pointer;font-weight:600;transition:background .2s}
+.steps-nav button:hover{background:var(--soft)}
+.steps-nav .num{width:34px;height:34px;border-radius:50%;background:var(--soft);border:2px solid var(--line);color:var(--fg);font-family:var(--head);font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.steps-nav button[aria-selected="true"]{background:var(--on-bg);color:#fff;border-color:var(--on-bg)}
+.steps-nav button[aria-selected="true"] .num{background:var(--accent);border-color:var(--accent);color:#fff}
+.steps-nav button.done .num{background:var(--accent-soft);border-color:var(--accent-mid);color:var(--accent-ink)}
+.step-card{padding:1.75rem}
+.step-card h4{font-family:var(--head);font-size:1.55rem;font-weight:600;margin:.3rem 0 .7rem;line-height:1.2}
+.step-card p{margin:0 0 .8rem;font-size:1.05rem}
+.step-card ul{margin:0 0 1rem;padding-left:1.2rem;color:var(--muted)}
+.step-card li{margin-bottom:.4rem}
+.bar{height:8px;background:var(--soft);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:1.25rem 0 1rem}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--sky));border-radius:999px;transition:width .35s}
+.step-actions{display:flex;gap:.6rem;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;padding:.45rem 1.1rem;border-radius:999px;font-weight:600;font-size:.92rem;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--on-bg);color:#fff}
+.car-top{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.car-ctrl{display:flex;gap:.4rem}
+.track{display:flex;gap:1rem;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:.8rem;scrollbar-width:thin;scrollbar-color:var(--accent-mid) var(--soft)}
+.proj{flex:0 0 min(300px,82%);scroll-snap-align:start;display:flex;flex-direction:column;gap:.4rem}
+.proj .yr{font-size:.8rem;font-weight:700;letter-spacing:.1em;color:var(--accent-ink);text-transform:uppercase}
+.proj h4{font-family:var(--head);font-size:1.08rem;font-weight:600;line-height:1.35;margin:0}
+.proj .au{font-size:.92rem;color:var(--muted)}
+.proj .tag{align-self:flex-start;margin-top:auto}
+.cta{margin-top:3rem;padding:1.75rem;background:var(--soft);border:1px solid var(--line);border-radius:16px;display:flex;flex-wrap:wrap;gap:1rem 2rem;align-items:center;justify-content:space-between}
+.cta h3{font-family:var(--head);font-size:1.4rem;margin:0 0 .25rem;font-weight:600}
+.cta p{margin:0;color:var(--muted);max-width:54ch}
+
+/* Panel 4 */
+.sem-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:.9rem;counter-reset:s}
+.sem-steps li{counter-increment:s;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.2rem 1rem 1rem;position:relative}
+.sem-steps li::before{content:counter(s);position:absolute;top:-14px;left:1rem;width:28px;height:28px;border-radius:50%;background:var(--accent-strong);color:#fff;font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center}
+.sem-steps h4{font-family:var(--head);font-size:1.02rem;font-weight:600;margin:0 0 .3rem;line-height:1.3}
+.sem-steps p{margin:0;font-size:.9rem;color:var(--muted);line-height:1.5}
+.search{position:relative;max-width:420px;width:100%}
+.search input{width:100%;padding:.7rem 1rem .7rem 2.6rem;border:1.5px solid var(--line);border-radius:999px;background:var(--surface);color:var(--fg);font:inherit;font-size:.95rem}
+.search input:focus{outline:none;border-color:var(--accent)}
+.search .ic{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--muted)}
+.filters{display:flex;flex-direction:column;gap:.9rem;margin-bottom:1.25rem}
+.count{font-size:.9rem;color:var(--muted)}
+.sem-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:1rem;align-items:start}
+.sem{padding:0;overflow:hidden}
+.sem-head{display:flex;gap:1rem;justify-content:space-between;align-items:flex-start;width:100%;background:none;border:0;padding:1.1rem 1.2rem;cursor:pointer;text-align:left}
+.sem-head:hover{background:var(--soft)}
+.sem-head h4{font-family:var(--head);font-size:1.1rem;font-weight:600;line-height:1.3;margin:0 0 .5rem}
+.sem-tags{display:flex;flex-wrap:wrap;gap:.35rem}
+.sem-body{padding:0 1.2rem 1.2rem;border-top:1px solid var(--line);display:grid;gap:.8rem;padding-top:1rem}
+.sem-body p{margin:0;color:var(--muted)}
+.sem.open .tl-chev{transform:rotate(180deg)}
+
+/* Panel 5 */
+.eis-hero{background:var(--navy);color:#fff;border-radius:18px;padding:2.25rem}
+.eis-hero h3{font-family:var(--head);font-size:clamp(1.6rem,3vw,2.1rem);font-weight:600;margin:0 0 .75rem;line-height:1.2}
+.eis-hero p{margin:0 0 1.25rem;max-width:66ch;color:rgba(255,255,255,.86)}
+.eis-chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.25rem}
+.eis-chips span{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:.25rem .85rem;font-size:.88rem}
+.eis-foot{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem;margin-top:1rem}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.2rem}
+.stat b{display:block;font-family:var(--head);font-size:2.6rem;font-weight:700;line-height:1;color:var(--accent-ink);font-variant-numeric:tabular-nums}
+.stat span{font-size:.92rem;color:var(--muted)}
+.mv{margin-top:1rem;padding:1.6rem}
+.mv h4{font-family:var(--head);font-size:1.3rem;font-weight:600;margin:0 0 .5rem}
+.mv p{margin:0;max-width:70ch;font-size:1.05rem}
+.dir-bar{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.line-info{margin:0 0 1.25rem}
+.line-info h4{font-family:var(--head);font-size:1.3rem;margin:0 0 .3rem;font-weight:600;display:flex;flex-wrap:wrap;align-items:center;gap:.6rem}
+.line-info p{margin:0;color:var(--muted);max-width:75ch}
+.dir-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:1rem;align-items:start}
+.inv{display:flex;flex-direction:column;gap:.75rem;padding:1.2rem}
+.inv-top{display:flex;gap:.8rem;align-items:flex-start}
+.inv-avatar{width:42px;height:42px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);font-family:var(--head);font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.inv-name{font-family:var(--head);font-weight:600;font-size:1.05rem;line-height:1.25;display:block}
+.inv-prog{font-size:.88rem;color:var(--muted);display:block}
+.inv-perfil{margin:0;font-size:.92rem;color:var(--muted);border-top:1px solid var(--line);padding-top:.7rem}
+.proys{display:grid;gap:.3rem}
+.proys span{font-size:.88rem;padding-left:.65rem;border-left:2px solid var(--accent-mid)}
+.links{display:flex;flex-wrap:wrap;gap:.4rem;border-top:1px solid var(--line);padding-top:.7rem}
+.links a{font-size:.8rem;font-weight:700;letter-spacing:.04em;text-decoration:none;background:var(--accent-soft);color:var(--accent-ink);padding:.25rem .7rem;border-radius:999px}
+.links a:hover{text-decoration:underline}
+
+/* Panel 6 */
+.pub-hero{background:linear-gradient(135deg,var(--navy) 0%,#1B3A6E 60%,#2D1B69 100%);color:#fff;border-radius:18px;padding:2.25rem;display:flex;flex-wrap:wrap;gap:2rem;align-items:center}
+.pub-hero>div:first-child{flex:1 1 300px}
+.pub-hero h3{font-family:var(--head);font-size:2rem;font-weight:600;margin:0 0 .6rem}
+.pub-hero p{margin:0 0 1.25rem;color:rgba(255,255,255,.86)}
+.pub-badge{border:1px solid rgba(196,181,253,.35);background:rgba(255,255,255,.08);border-radius:14px;padding:1.2rem 1.8rem;text-align:center}
+.pub-badge b{font-family:var(--head);font-size:2.4rem;color:var(--accent-mid);display:block;line-height:1.1}
+.pub-badge small{font-size:.85rem;color:rgba(255,255,255,.75)}
+.pub-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:1rem}
+.pub-cards h4{font-family:var(--head);font-size:1.1rem;font-weight:600;margin:.5rem 0 .3rem}
+.pub-cards p{margin:0;color:var(--muted);font-size:.95rem}
+.note{color:var(--muted);margin:0 0 1.1rem}
+
+footer{background:var(--navy);color:rgba(200,223,245,.85);text-align:center;padding-block:1.75rem;font-size:.9rem}
+footer strong{color:#fff}
+footer small{display:block;margin-top:.3rem;font-size:.82rem;color:rgba(200,223,245,.65)}
+
+.to-top{position:fixed;right:calc(1rem + env(safe-area-inset-right,0px));bottom:calc(1rem + env(safe-area-inset-bottom,0px));width:46px;height:46px;border-radius:50%;border:0;background:var(--accent-strong);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);z-index:40;opacity:0;pointer-events:none;transition:opacity .25s}
+.to-top.show{opacity:1;pointer-events:auto}
+.toast{position:fixed;left:50%;bottom:calc(1.5rem + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:.65rem 1.2rem;border-radius:999px;font-size:.92rem;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:100;max-width:calc(100vw - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* Formularios */
+.overlay{position:fixed;inset:0;background:rgba(8,20,38,.6);z-index:90;display:none;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:var(--surface);color:var(--fg);border-radius:18px;max-width:700px;width:100%;max-height:92vh;overflow-y:auto;padding:2rem;position:relative;box-shadow:var(--shadow)}
+.modal-close{position:absolute;top:1rem;right:1rem}
+.modal h3{font-family:var(--head);font-size:1.55rem;font-weight:600;margin:0 2.5rem .25rem 0;line-height:1.25}
+.modal .sub2{color:var(--muted);font-size:.92rem;margin:0 0 1.25rem}
+.fsec{font-family:var(--head);font-size:1.1rem;font-weight:600;color:var(--link);margin:1.5rem 0 .75rem;padding-bottom:.3rem;border-bottom:1px solid var(--line)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.fg{margin-bottom:1rem;min-width:0}
+.fg label{display:block;font-size:.88rem;font-weight:600;margin-bottom:.3rem}
+.fg input,.fg select,.fg textarea{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:.6rem .8rem;background:var(--bg);color:var(--fg);font:inherit;font-size:.95rem}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--accent)}
+.fg input[readonly]{background:var(--soft)}
+.fg textarea{min-height:84px;resize:vertical}
+.modal-actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--line)}
+.fnote{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:.7rem .9rem;font-size:.88rem;color:var(--muted);margin-top:1rem}
+
+@media (max-width:860px){
+  .hero,.meta-layout,.stepper{grid-template-columns:minmax(0,1fr)}
+  .meta-detail{position:static}
+  .principles{grid-template-columns:minmax(0,1fr)}
+  .principle+.principle{border-left:0;border-top:1px solid rgba(200,223,245,.16)}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  main{padding-block:2rem 3.5rem}
+  .eis-hero,.pub-hero{padding:1.5rem}
+  .modal{padding:1.4rem}
+  .frow{grid-template-columns:minmax(0,1fr)}
+  .tab{padding:.85rem .9rem;font-size:.78rem}
+}
+.print-valor{display:none}
+@media print{
+  :root:root:root{--surface:#fff;--bg:#fff;--fg:#0D2340;--muted:#333;--line:#bbb;--soft:#fff;--link:#1B4F8A}
+  body{display:block;background:#fff}
+  body::before,.masthead,.tabs,main,footer,.to-top,.toast,.modal-close,.modal-actions,.fnote{display:none!important}
+  .overlay.open{position:static;background:none;padding:0;display:block}
+  .modal{box-shadow:none;border-radius:0;max-height:none;overflow:visible;max-width:100%;padding:1rem}
+  .overlay input,.overlay textarea,.overlay select{display:none!important}
+  .print-valor{display:block;font-size:.95rem;border-bottom:1px solid #bbb;padding:.2rem 0;min-height:1.5rem;white-space:pre-wrap}
+  .fg,.fsec{break-inside:avoid}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="wrap">
+    <div class="brand-label">Politécnico Grancolombiano</div>
+    <div class="brand-title">Investigación en la EEI</div>
+    <div class="brand-sub">Orientaciones para estudiantes e investigadores</div>
+  </div>
+</div>
+
+<nav class="tabs" aria-label="Secciones">
+  <div class="progress" id="progress"></div>
+  <div class="wrap" role="tablist">
+    <button class="tab" role="tab" data-tab="eei" aria-selected="true">Investigación en la EEI</button>
+    <button class="tab" role="tab" data-tab="comite" aria-selected="false">Comité</button>
+    <button class="tab" role="tab" data-tab="proyectos" aria-selected="false">Proyectos</button>
+    <button class="tab" role="tab" data-tab="semilleros" aria-selected="false">Semilleros</button>
+    <button class="tab" role="tab" data-tab="grupo" aria-selected="false">Grupo EIS</button>
+    <button class="tab" role="tab" data-tab="publicaciones" aria-selected="false">Publicaciones</button>
+  </div>
+</nav>
+
+<main>
+<div class="wrap">
+
+  <!-- PANEL 1 -->
+  <section id="panel-eei" class="panel active" role="tabpanel">
+    <div class="hero">
+      <div>
+        <p class="eyebrow">Punto de partida</p>
+        <h2 class="title">Investigación en la Escuela <em>de Educación e Innovación</em></h2>
+        <p class="lede">El modelo de gestión en la EEI busca construir una cultura interna de investigación sólida, articulada alrededor de tres principios fundamentales.</p>
+      </div>
+      <div class="quick" id="quick"></div>
+    </div>
+
+    <div class="principles">
+      <div class="principle"><div class="badge" data-ic="link" data-s="22"></div><h3>Coherencia</h3><p>Alineación entre líneas de investigación, proyectos y producción académica del grupo EIS.</p></div>
+      <div class="principle"><div class="badge" data-ic="list" data-s="22"></div><h3>Planificación</h3><p>Formulación estructurada de proyectos con metas, indicadores y cronogramas definidos.</p></div>
+      <div class="principle"><div class="badge" data-ic="folder" data-s="22"></div><h3>Registro</h3><p>Sistematización en SIGIIP, CvLAC y GrupLAC para trazabilidad institucional.</p></div>
+    </div>
+
+    <h3 class="sub">Funciones de la coordinación de investigación</h3>
+    <ul class="check-list" id="funciones-eei"></ul>
+
+    <h3 class="sub">Metas institucionales 2026</h3>
+    <div class="meta-layout">
+      <div class="meta-list" id="meta-list" role="tablist" aria-label="Metas institucionales"></div>
+      <div class="card meta-detail" id="meta-detail" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- PANEL 2 -->
+  <section id="panel-comite" class="panel" role="tabpanel">
+    <p class="eyebrow">Estructura de gobierno</p>
+    <h2 class="title">Comité de investigación</h2>
+    <p class="lede">El Comité de Investigación de Escuela interactúa con el Comité de Investigación de Facultad para decisiones sobre semilleros, proyectos y convocatorias.</p>
+
+    <h3 class="sub first">Integrantes</h3>
+    <div class="flip-grid" id="people"></div>
+
+    <h3 class="sub">Funciones del comité</h3>
+    <ul class="check-list" id="funciones-comite"></ul>
+
+    <h3 class="sub">Novedades 2026</h3>
+    <div class="chips" id="nov-filters" role="group" aria-label="Filtrar novedades"></div>
+    <ol class="timeline" id="timeline"></ol>
+  </section>
+
+  <!-- PANEL 3 -->
+  <section id="panel-proyectos" class="panel" role="tabpanel">
+    <p class="eyebrow">Ciclo de vida</p>
+    <h2 class="title">Proyectos de investigación</h2>
+    <p class="lede">Un proyecto en la EEI se concibe como un ejercicio de investigación aplicada. Es la base para la asignación de horas y la producción académica del investigador.</p>
+    <p style="margin:1.5rem 0 0"><a class="btn btn-dark" href="https://sigiipinterno.poligran.edu.co/" target="_blank" rel="noopener"><span data-ic="ext" data-s="18"></span>Ir a SIGIIP, Sistema de Gestión de Investigación</a></p>
+
+    <h3 class="sub first">Principios para formular un proyecto</h3>
+    <ul class="check-list" id="principios-proy"></ul>
+
+    <h3 class="sub">Ruta del proyecto en cinco etapas</h3>
+    <div class="stepper">
+      <ol class="steps-nav" id="steps-nav" role="tablist" aria-label="Etapas del proyecto"></ol>
+      <div class="card step-card" id="step-card" aria-live="polite"></div>
+    </div>
+
+    <h3 class="sub">Proyectos de la Escuela</h3>
+    <div class="car-top">
+      <div class="seg" id="car-seg" role="group" aria-label="Tipo de proyecto">
+        <button aria-pressed="true" data-set="curso">En curso</button>
+        <button aria-pressed="false" data-set="dest">Destacados</button>
+      </div>
+      <div class="car-ctrl">
+        <button class="icon-btn" id="car-prev" aria-label="Anterior"></button>
+        <button class="icon-btn" id="car-next" aria-label="Siguiente"></button>
+      </div>
+    </div>
+    <div class="chips" id="car-filters" role="group" aria-label="Filtrar por línea" style="margin-bottom:1rem"></div>
+    <div class="track" id="track" tabindex="0" aria-label="Proyectos"></div>
+
+    <div class="cta">
+      <div>
+        <h3>¿Quieres presentar un proyecto al comité?</h3>
+        <p>Completa el formulario de presentación con los datos requeridos. Puedes guardarlo como PDF desde el navegador.</p>
+      </div>
+      <button class="btn btn-primary" data-open="modal-proyecto"><span data-ic="folder" data-s="18"></span>Abrir formulario de proyecto</button>
+    </div>
+  </section>
+
+  <!-- PANEL 4 -->
+  <section id="panel-semilleros" class="panel" role="tabpanel">
+    <p class="eyebrow">Formación investigativa</p>
+    <h2 class="title">Semilleros de investigación</h2>
+    <p class="lede">Los semilleros articulan su plan de trabajo hacia la formulación de proyectos que faciliten la generación de productos de nuevo conocimiento y apropiación social.</p>
+
+    <h3 class="sub first">¿Cómo crear un semillero en la EEI?</h3>
+    <ol class="sem-steps" id="sem-steps"></ol>
+
+    <h3 class="sub">Semilleros activos de la EEI</h3>
+    <div class="filters">
+      <div class="search"><span data-ic="search" data-s="18"></span><input type="search" id="sem-q" placeholder="Buscar por nombre, líder o programa" aria-label="Buscar semilleros"></div>
+      <div class="chips" id="sem-filters" role="group" aria-label="Filtrar por línea"></div>
+      <div class="count" id="sem-count" aria-live="polite"></div>
+    </div>
+    <div class="sem-grid" id="sem-grid"></div>
+
+    <div class="cta">
+      <div>
+        <h3>¿Quieres crear un semillero?</h3>
+        <p>Completa el formulario de apertura de semillero para presentar tu propuesta ante el Comité de Investigación de Escuela.</p>
+      </div>
+      <button class="btn btn-primary" data-open="modal-semillero"><span data-ic="folder" data-s="18"></span>Abrir formulario de semillero</button>
+    </div>
+  </section>
+
+  <!-- PANEL 5 -->
+  <section id="panel-grupo" class="panel" role="tabpanel">
+    <p class="eyebrow">Comunidad académica</p>
+    <h2 class="title">Grupo de investigación EIS</h2>
+    <p class="lede">El grupo Educación, Innovación y Sociedad es el grupo de investigación institucional al que se adscriben los proyectos y semilleros de la EEI.</p>
+
+    <div class="eis-hero" style="margin-top:2rem">
+      <h3>Educación, Innovación y Sociedad</h3>
+      <p>Desarrolla procesos de investigación educativa orientados a comprender y transformar las prácticas pedagógicas, curriculares y de gestión educativa en diversos contextos sociales y territoriales. El grupo busca producir conocimiento relevante para la comprensión de los territorios y sus realidades educativas, así como para la formulación de propuestas de innovación educativa que contribuyan al fortalecimiento de los sistemas educativos.</p>
+      <div class="eis-chips">
+        <span>Creado: febrero 2018</span><span>Código: COL0200112</span><span>Categoría: B</span><span>Gran área: Ciencias Sociales</span><span>Área: Ciencias de la Educación</span>
+      </div>
+      <div class="eis-foot">
+        <span style="color:rgba(255,255,255,.8)">Líder: Camila Suárez Acevedo</span>
+        <a class="btn btn-primary" href="https://scienti.minciencias.gov.co/gruplac/jsp/visualiza/visualizagr.jsp?nro=00000000020215" target="_blank" rel="noopener"><span data-ic="ext" data-s="18"></span>Ver en GrupLAC</a>
+      </div>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat"><b data-count="8">8</b><span>Años de trayectoria</span></div>
+      <div class="stat"><b data-count="5">5</b><span>Líneas de investigación</span></div>
+      <div class="stat"><b data-count="13" id="stat-inv">13</b><span>Investigadores</span></div>
+      <div class="stat"><b data-count="10" id="stat-sem">10</b><span>Semilleros activos</span></div>
+    </div>
+
+    <h3 class="sub">Misión y visión</h3>
+    <div class="seg" id="mv-seg" role="group" aria-label="Misión o visión">
+      <button aria-pressed="true" data-mv="m">Misión</button>
+      <button aria-pressed="false" data-mv="v">Visión</button>
+    </div>
+    <div class="card mv" id="mv-card" aria-live="polite"></div>
+
+    <h3 class="sub">Directorio de investigadores</h3>
+    <div class="dir-bar">
+      <div class="search"><span data-ic="search" data-s="18"></span><input type="search" id="dir-q" placeholder="Buscar investigador, programa o proyecto" aria-label="Buscar investigadores"></div>
+    </div>
+    <div class="chips" id="dir-tabs" role="group" aria-label="Línea de investigación" style="margin-bottom:1.25rem"></div>
+    <div class="line-info" id="line-info" aria-live="polite"></div>
+    <div class="dir-grid" id="dir-grid"></div>
+  </section>
+
+  <!-- PANEL 6 -->
+  <section id="panel-publicaciones" class="panel" role="tabpanel">
+    <p class="eyebrow">Difusión del conocimiento</p>
+    <h2 class="title">Publicaciones</h2>
+    <p class="lede">La producción y difusión de nuevo conocimiento es un compromiso de todos los investigadores y semilleros de la EEI.</p>
+
+    <div class="pub-hero" style="margin-top:2rem">
+      <div>
+        <h3>Revista Panorama</h3>
+        <p>Publicación científica del Politécnico Grancolombiano que promueve la producción investigativa en educación, innovación y ciencias sociales.</p>
+        <a class="btn btn-primary" href="https://journal.poligran.edu.co/index.php/panorama" target="_blank" rel="noopener">Visitar Revista Panorama<span data-ic="ext" data-s="16"></span></a>
+      </div>
+      <div class="pub-badge"><b>OJS</b><small>Open Journal System</small></div>
+    </div>
+    <p style="margin:1.25rem 0 0"><a class="btn btn-dark" href="https://docs.google.com/forms/d/e/1FAIpQLSdT_ais0mbhx9aOyDIn9KOPOZI-EyS7RvpqJy7aCNmujQYRhA/viewform?usp=dialog" target="_blank" rel="noopener"><span data-ic="link" data-s="18"></span>¿Quieres colaborar como par evaluador de Panorama?</a></p>
+
+    <h3 class="sub">Publicaciones destacadas de la EEI</h3>
+    <p class="note">Este espacio se actualiza con las producciones más relevantes de los profesores e investigadores de la Escuela.</p>
+    <div class="pub-cards">
+      <div class="card"><span class="tag violet">Próximamente</span><h4>Producción del grupo EIS</h4><p>Aquí se enlazarán artículos y publicaciones destacadas del grupo Educación, Innovación y Sociedad.</p></div>
+      <div class="card"><span class="tag violet">Próximamente</span><h4>Productos TOP</h4><p>Producciones de nuevo conocimiento y productos TOP de los profesores investigadores de la EEI.</p></div>
+    </div>
+
+    <h3 class="sub">Presentaciones en eventos</h3>
+    <p class="note">Participaciones de investigadores y semilleros de la EEI en eventos académicos nacionales e internacionales.</p>
+    <div class="pub-cards">
+      <div class="card"><span class="tag violet">Próximamente</span><h4>Ponencias y conferencias</h4><p>Aquí se registrarán las participaciones en congresos, simposios y eventos de divulgación académica.</p></div>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <strong>Investigación en la Escuela de Educación e Innovación</strong> · Orientaciones para estudiantes e investigadores
+    <small>Recurso de apoyo elaborado por Camila Suárez Acevedo © 2026 · Politécnico Grancolombiano</small>
+  </div>
+</footer>
+
+<button class="to-top" id="to-top" aria-label="Volver arriba"></button>
+<div class="toast" id="toast" role="status"></div>
+
+<div class="overlay" id="modal-proyecto" role="dialog" aria-modal="true" aria-labelledby="mp-t">
+  <div class="modal">
+    <button class="icon-btn modal-close" data-close aria-label="Cerrar"></button>
+    <div style="margin-bottom:1rem"><img src="IDENTIFICADOR_ESCUELA_DE_EDUCACION_E_INNOVACION_COLOR.png" alt="Escuela de Educación e Innovación" style="height:50px;object-fit:contain" onerror="this.parentNode.style.display='none'"></div>
+    <h3 id="mp-t">Presentación de proyecto de investigación</h3>
+    <p class="sub2">Comité de Investigación · Escuela de Educación e Innovación · EEI</p>
+    <form id="form-proyecto" onsubmit="return false"></form>
+  </div>
+</div>
+<div class="overlay" id="modal-semillero" role="dialog" aria-modal="true" aria-labelledby="ms-t">
+  <div class="modal">
+    <button class="icon-btn modal-close" data-close aria-label="Cerrar"></button>
+    <div style="margin-bottom:1rem"><img src="IDENTIFICADOR_ESCUELA_DE_EDUCACION_E_INNOVACION_COLOR.png" alt="Escuela de Educación e Innovación" style="height:50px;object-fit:contain" onerror="this.parentNode.style.display='none'"></div>
+    <h3 id="ms-t">Apertura de semillero de investigación</h3>
+    <p class="sub2">Comité de Investigación · Escuela de Educación e Innovación · EEI</p>
+    <form id="form-semillero" onsubmit="return false"></form>
+  </div>
+</div>
+
+<script>
+(function(){
+  var $=function(s,r){return (r||document).querySelector(s)};
+  var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Iconos */
+  var P={
+    link:'<path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11.5 4.43"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.33-1.33"/>',
+    list:'<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',
+    folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>',
+    left:'<path d="M15 5l-7 7 7 7"/>', right:'<path d="M9 5l7 7-7 7"/>',
+    search:'<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.2-4.2"/>',
+    chev:'<path d="M6 9l6 6 6-6"/>', up:'<path d="M6 15l6-6 6 6"/>',
+    ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+    close:'<path d="M6 6l12 12M18 6L6 18"/>'
+  };
+  function ic(n,s){s=s||20;return '<svg class="ic" width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+P[n]+'</svg>'}
+  function fillIcons(root){$$('[data-ic]',root).forEach(function(e){e.innerHTML=ic(e.getAttribute('data-ic'),+e.getAttribute('data-s')||20)})}
+
+  /* Datos */
+  var TABS=['eei','comite','proyectos','semilleros','grupo','publicaciones'];
+  var TAB_NAMES={eei:['Punto de partida','Investigación en la EEI'],comite:['Estructura de gobierno','Comité de investigación'],proyectos:['Ciclo de vida','Proyectos de investigación'],semilleros:['Formación investigativa','Semilleros de investigación'],grupo:['Comunidad académica','Grupo de investigación EIS'],publicaciones:['Difusión del conocimiento','Publicaciones']};
+
+  var FUN_EEI=['Gestión de la información de proyectos, semilleros y productos.','Alineación académica entre líneas, proyectos y productos.','Formación en investigación: semilleros y seminarios.','Formulación de documentos orientadores para investigadores y estudiantes.','Enlace de comunicación entre niveles institucionales.'];
+  var METAS=[
+    ['Participación estudiantil','Fomentar la vinculación de estudiantes a proyectos y actividades de investigación.'],
+    ['Ruta de formación integrada','Fortalecer la ruta de formación en investigación en todos los programas.'],
+    ['Relación U-Estado-Empresa','Contribuir al fortalecimiento de vínculos entre la universidad, el sector público y privado, a través de consultorías.'],
+    ['Ruta de innovación','Promover la formulación de productos de innovación al interior de los programas.'],
+    ['Producción intelectual','Potenciar la generación de productos TOP y publicaciones en revistas indizadas.'],
+    ['Visibilidad de resultados','Difundir resultados en eventos, repositorios y publicaciones institucionales.']
+  ];
+  var PEOPLE=[
+    ['GM','Gerardo A. Machuca','Director de Escuela','Preside','gmachuca@poligran.edu.co'],
+    ['CS','Camila Suárez Acevedo','Líder de investigación de Escuela','Coordinación','gcasuarez@poligran.edu.co'],
+    ['MR','Marcela Riveros','Lic. Ciencias Sociales','Líder de investigación','mriverosa@poligran.edu.co'],
+    ['MT','Magda Trujillo','Lic. Educación Infantil','Líder de investigación','mztrujillo@poligran.edu.co'],
+    ['AM','Alexandra Monsalve','Lic. Educación Básica Primaria','Líder de investigación','jamonsalve@poligran.edu.co'],
+    ['VM','Vanessa Mora','Lic. Ciencias Naturales','Líder de investigación','lvamorag@poligran.edu.co'],
+    ['CM','Cristian Mateus','Lic. Lenguas Extranjeras','Líder de investigación','cmamateusa@poligran.edu.co'],
+    ['MV','María Isabel Villada','Posgrados','Coordinadora','misvillada@poligran.edu.co'],
+    ['MM','Mónica Mantilla','Centro de Investigación en Innovación Educativa','Líder del CIIE','mmantillac@poligran.edu.co']
+  ];
+  var FUN_COM=['Enlazan la comunicación entre direccionamiento, coordinación e investigadores por niveles.','Diseñan estrategias para la organización y sistematización de información por niveles.','Facilitan la toma de decisiones relacionadas con la investigación.','Acompañan y fomentan la formulación de proyectos de investigación de calidad.','Toman decisiones sobre la aprobación de proyectos y su ciclo de vida.','Velan por el seguimiento y monitoreo de los proyectos aprobados.','Monitorean la implementación del plan de investigaciones del programa.','Aseguran el cumplimiento de parámetros del CNA, Minciencias y MEN.'];
+  var NOV=[
+    {t:'ext',f:'10 Ago 2026',ti:'Proyectos externos aprobados',s:[['Proyectos liderados por la profesora María del Pilar García',['Lifelong Learning, Inclusión Digital y Competencias Filantrópicas: Estrategias Globales para una Sociedad Contemporánea (en colaboración con Unesco).','Uso crítico de la mediación tecnológica en la educación superior: aprendizaje activo y pensamiento crítico frente a la IA (en colaboración con el Tecnológico de Monterrey y participación de Camila Suárez Acevedo como co-investigadora).']]]},
+    {t:'apr',f:'29 Jul 2026',ti:'Proyectos aprobados: semilleros de investigación',s:[['Semilleros, región',['De los relevos generacionales a las relaciones intergeneracionales en los Montes de María: una lectura territorial desde Paso el Medio y La Suprema (María la Baja, Bolívar) y Las Cruces (Tuchín, Córdoba).','Educación y desigualdad en clave territorial: análisis de relatos desde la escuela primaria.']],['Capacidades instaladas',['Narrar las travesías: investigación-creación de literatura infantil en contextos de migración venezolana.']],['Cofinanciación',['Narrativas de lo cotidiano: crónicas, memoria y escritura universitaria.']]]},
+    {t:'reu',f:'6 Abr 2026',ti:'Reunión de comité: abril',s:[['Temas tratados',['Revisión técnica de tres proyectos para la convocatoria de investigación aplicada 2026: Estado del arte de tendencias en investigación formativa, Pensamiento crítico y ciudadanía, y Pedagogía multicolor.','Compromisos de producción y recomendaciones sobre ética y tratamiento de datos.']],['Decisiones y acuerdos',['Ajustar las fechas de inicio de los proyectos en la plataforma SIGIIP para agosto de 2026.','El comité acordó verificar que todos los proyectos que involucren personas expliquen el manejo de anonimato y datos sensibles para evitar devoluciones.']]]}
+  ];
+  var NOV_TYPES=[['all','Todas'],['reu','Reuniones'],['apr','Aprobaciones'],['ext','Proyectos externos']];
+  var PRINC=['El profesor debe hacer parte del grupo EIS o proyectar su vinculación.','El proyecto debe articularse con una línea del grupo Educación, Innovación y Sociedad.','No se avalarán proyectos de forma retroactiva.','Los proyectos deben estar registrados en SIGIIP con código formal.','Todos los profesores vinculados deben generar productos de nuevo conocimiento.'];
+  var STEPS=[
+    ['Formulación','El profesor interesado formula una iniciativa y la comunica al líder de investigación de su programa para verificar alineación con las líneas del grupo EIS.'],
+    ['Socialización con el líder de programa','El líder acompaña el proceso y agenda la presentación del proyecto ante el Comité de Investigación de Escuela.'],
+    ['Socialización en comités de investigación','Se consideran las metas e indicadores de la Escuela. El proyecto se postula en SIGIIP para su evaluación.'],
+    ['Evaluación en convocatoria vigente','El proyecto se evalúa según los términos y referencias de la convocatoria institucional o externa vigente.'],
+    ['Formalización y desarrollo','Al proyecto aprobado se le genera un código. El investigador principal debe:',['Cargar el proyecto al CvLAC e informar al líder del grupo EIS para vinculación en GrupLAC.','Gestionar reportes de avances, prórrogas y producción en SIGIIP.','Generar productos TOP y publicaciones en revistas indizadas (obligatorio para investigaciones docentes).']]
+  ];
+  var PROJ={
+    curso:[
+      ['2025','Modelo de formación docente en educación desde la paz a través de las emociones políticas','Karina Bautista','Educación inicial'],
+      ['2025','POLSPRINTLAB: estrategia didáctica para el desarrollo de proyectos de innovación','Gustavo Díaz','Innovación educativa'],
+      ['2025','Prácticas de cuidado para la participación y la construcción de paz en los Montes de María','Haidy Rodríguez','Educación inicial'],
+      ['2025','Museo expandido: diseño de experiencias interactivas para la colección del Museo de Ciencias Naturales de La Salle','Bibiana Correa','Comunicación y cultura']
+    ],
+    dest:[
+      ['2024','Perspectivas globales sobre el bienestar y la salud mental de los docentes tras la pandemia de COVID-19','Jaime Castro','Innovación educativa'],
+      ['2022','Aprendizaje basado en investigación: formación de historiadores en la construcción de fuentes primarias','Juan Pablo Díaz','Educación y CCSS'],
+      ['2021','Literatupaz: investigación-creación de obras literarias infantiles sobre y para la paz','Magda Trujillo','Comunicación y cultura']
+    ]
+  };
+  var PROJ_LINES=['Educación inicial','Innovación educativa','Comunicación y cultura','Educación y CCSS'];
+  var SEM_STEPS=[
+    ['Verificar semilleros existentes','Revisar los semilleros activos en el programa y su coherencia con las líneas del grupo EIS.'],
+    ['Consolidar una propuesta','Incluir nombre, programa, línea de investigación, objetivo, articulación con ODS y plan de trabajo proyectado.'],
+    ['Comunicar la iniciativa','Manifestar el interés a la coordinación del programa y al líder de investigación respectivo.'],
+    ['Estudio de pertinencia','El coordinador y el líder estudian la pertinencia y solicitan al Comité de Escuela un espacio de socialización.'],
+    ['Aprobación institucional','Si la iniciativa es aprobada en el Comité de Escuela, se escala al Comité de Facultad para aprobación institucional.']
+  ];
+  var SEM_LINES=['Educación y ciencias sociales','Educación inicial, infancias y ruralidad','Comunicación, cultura y estética','Educación STEM'];
+  var SEM=[
+    ['Educación y paz, memoria y territorio','Explora las relaciones entre educación, paz y construcción de memoria histórica en diversos territorios.','Lised García','Lic. Ciencias Sociales',0,'dlgarcia@poligran.edu.co'],
+    ['Educación y territorio','Investiga las dinámicas entre procesos educativos y contextos territoriales, históricos y socioculturales.','Juan Pablo Díaz','Lic. Ciencias Sociales',0,'jdiaz@poligran.edu.co'],
+    ['Perspectivas socioespaciales de la educación en Colombia','Analiza las dimensiones espaciales y sociológicas de los sistemas educativos en Colombia.','Marcela Riveros','Lic. Ciencias Sociales',0,'mriverosa@poligran.edu.co'],
+    ['Infancias pluriversales: contextos, voces y sentires','Reconoce la diversidad de experiencias infantiles desde perspectivas sociales y culturales situadas.','Cindy Martínez','LEI',1,'cjmartinez@poligran.edu.co'],
+    ['Infancias rurales: diversidad-es','Estudia las infancias en contextos rurales y sus condiciones educativas, sociales y culturales.','Haidy Rodríguez','LEI',1,'hrodriguez@poligran.edu.co'],
+    ['La cocina de la noche: investigación, creación y educación literaria','Explora la intersección entre literatura infantil, educación y creación artística.','Magda Trujillo','LEI',2,'mztrujillo@poligran.edu.co'],
+    ['Resonancias y exploraciones sobre las narrativas y los lenguajes de las infancias','Investiga las narrativas y los lenguajes de las infancias.','Nidia Patricia Cuadros','LEI',2,'ncuadros@poligran.edu.co'],
+    ['Vamos a la escuela','Analiza las prácticas pedagógicas y los procesos de aprendizaje en los primeros ciclos de educación básica primaria.','Yessica Gómez','LEBP',1,'yagomezz@poligran.edu.co'],
+    ['Taller LEO','Espacio de exploración pedagógica orientado a la lectura, escritura y creación literaria como herramientas educativas.','Bibiana Correa','Create Camps',2,'bascorrea@poligran.edu.co'],
+    ['Educación STEM en Ciencias Naturales desde el Territorio','Se propone fortalecer la formación investigativa y pedagógica mediante el diseño de estrategias didácticas innovadoras para la enseñanza de las ciencias en territorios diversos y aulas multigrado.','Vanessa Mora','Lic. Ciencias Naturales',3,'lvamorag@poligran.edu.co']
+  ];
+  var LINES=[
+    ['Ciencias sociales','Educación y Ciencias Sociales','Comprende las relaciones entre educación, territorio y procesos socioculturales. Analiza la enseñanza de las ciencias sociales y la construcción de memoria, ciudadanía y cultura democrática en diversos contextos educativos.'],
+    ['Infancias y ruralidad','Educación inicial, infancias y ruralidad','Genera conocimiento sobre las prácticas educativas que configuran las infancias en diversos contextos, con énfasis en la educación inicial, la ruralidad y el reconocimiento de niños y niñas como sujetos sociales y de derechos.'],
+    ['STEM','Educación STEM, pensamiento científico y apropiación de la ciencia','Investiga estrategias pedagógicas para el desarrollo del pensamiento científico y la apropiación social de la ciencia en diferentes niveles educativos, promoviendo enfoques interdisciplinarios en educación STEM.'],
+    ['Innovación','Innovación educativa, gestión y oportunidades','Analiza y desarrolla procesos de innovación educativa orientados a la transformación de prácticas pedagógicas, modelos de gestión y mediaciones tecnológicas en la educación.'],
+    ['Comunicación y cultura','Comunicación, cultura y estética','Investiga las relaciones entre lenguaje, cultura y educación, analizando los procesos de lectura, escritura y creación estética como dimensiones fundamentales para la formación de sujetos críticos.']
+  ];
+  var CV='https://scienti.minciencias.gov.co/cvlac/visualizador/generarCurriculoCv.do?cod_rh=', OR='https://orcid.org/';
+  function R(l,i,n,pr,em,pf,cat,py,cv,orc,sc,web){return {l:l,i:i,n:n,pr:pr,e:em+'@poligran.edu.co',pf:pf,cat:cat,py:py,cv:cv,or:orc,sc:sc,web:web}}
+  var INV=[
+    R(0,'LG','Lised García','Lic. Ciencias Sociales','dlgarcia','Investigadora en educación para la paz, memoria histórica y territorio.','Junior',['Cartografías para la paz','Documental Historias de Vida'],'0001600964','0000-0002-0532-4835','https://scholar.google.es/citations?view_op=list_works&hl=es&user=XYu8QRgAAAAJ'),
+    R(0,'JP','Juan Pablo Díaz','Lic. Ciencias Sociales','jdiaz','Investigador en historia regional, fuentes primarias y pensamiento histórico.','Junior',['Historia regional del Magdalena Grande','Formación de historiadores'],'0001701080','0000-0001-5296-8951','https://scholar.google.com/citations?hl=es&user=PysUa0wAAAAJ'),
+    R(0,'MR','Marcela Riveros','Lic. Ciencias Sociales','mriverosa','Investigadora en perspectivas socioespaciales de la educación colombiana.','',['Perspectivas socioespaciales'],'0001341076','0000-0002-1875-640X',''),
+    R(1,'JC','Jaime Castro','Posgrados EEI','jcastro','Investigador en desarrollo infantil y bienestar docente.','Asociado',['Bienestar docente post-COVID'],'0001016474','0000-0002-1410-7947','https://scholar.google.com.co/citations?user=3eVMHqEAAAAJ&hl=es'),
+    R(1,'KB','Karina Bautista','LEI','kbautista','Investigadora en educación para la paz desde las emociones políticas en primera infancia.','',['Emociones políticas en infancia','Calidad educativa en reclusión'],'0000049492','0000-0002-1260-208X','https://scholar.google.es/citations?user=oO870FEAAAAJ&hl=es'),
+    R(1,'HR','Haidy Rodríguez','LEI','hrodriguez','Investigadora en infancias rurales y prácticas de cuidado en territorios de conflicto.','',['Prácticas de cuidado y paz'],'0001463251','0000-0002-7972-4719','https://scholar.google.com/citations?user=IqUJ9NAAAAAJ&hl=es'),
+    R(2,'VM','Vanessa Mora','Lic. Ciencias Naturales','lvamorag','Investigadora en didáctica de las ciencias y educación STEM en territorios diversos y aulas multigrado.','',['STEM en Ciencias Naturales desde el Territorio'],'0000125159','0000-0002-7995-7600','https://scholar.google.com.co/citations?user=tV7hg28AAAAJ&hl=es&oi=ao'),
+    R(3,'CS','Camila Suárez Acevedo','MIE','gcasuarez','Líder del grupo EIS. Investigación interdisciplinar en educación, IA y desarrollo.','Junior',['Formación investigativa en educación virtual','Mediación cognitiva e IA'],'0001451049','0000-0002-5347-941X','https://scholar.google.com.co/citations?user=hfXNuyIAAAAJ&hl=es'),
+    R(3,'MM','Mónica Mantilla','CIIE','mmantillac','Investigadora en libros interactivos y habilidades blandas en educación superior.','Junior',['Mi-Books multimedia','Habilidades blandas'],'0001534060','0000-0003-1718-6377','https://scholar.google.com/citations?user=2eznZAkAAAAJ&hl=es'),
+    R(3,'GD','Gustavo Díaz','Posgrados EEI','gaddiaz','Investigador en didáctica de la innovación y estrategias para proyectos creativos.','Junior',['POLSPRINTLAB'],'0001366216','0000-0002-4688-0520','https://scholar.google.com/citations?user=IU8laR8AAAAJ&hl=es&oi=ao'),
+    R(3,'PG','María del Pilar García','Posgrados EEI','mdgarcia','Investigadora en innovación pedagógica y gestión educativa.','Junior',['Habilidades blandas'],'0001459975','0000-0001-6776-3422','https://scholar.google.com/citations?hl=es&user=-NEnYYcAAAAJ','https://pilargarciach.github.io/mpgch_research-literacy/'),
+    R(4,'MT','Magda Trujillo','LEI','mztrujillo','Investigadora en literatura infantil, educación literaria y creación artística.','',['Literatupaz','Artefactos artísticos sobre migración'],'0001345335','0000-0001-5984-349X',''),
+    R(4,'MV','María Isabel Villada','Posgrados EEI','misvillada','Investigadora en cartografías literarias y literatura en contextos urbanos.','',['Cartografías literarias de ciudad'],'0001842848','0000-0001-5895-7057','https://scholar.google.com/citations?user=7c0FVxAAAAAJ&hl=es&oi=ao')
+  ];
+  var MV={m:['Misión','Desarrollar investigación en el campo de las ciencias de la educación orientada a comprender y transformar las prácticas pedagógicas, los procesos de formación y las dinámicas educativas en diversos contextos sociales y territoriales.'],v:['Visión','Consolidarse como referente académico en investigación educativa orientada al análisis de las relaciones entre educación, sociedad y territorio, con reconocimiento en el sistema nacional de ciencia, tecnología e innovación.']};
+
+  /* Utilidades */
+  var toastT;
+  function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show')},2200)}
+  function copyText(t){
+    function ok(){toast('Copiado: '+t)}
+    function fb(){var a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy');ok()}catch(e){toast('Selecciona el texto y cópialo')}a.remove()}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,fb)}else fb()
+  }
+  function emailRow(e){return '<div class="email"><span>'+e+'</span><button class="icon-btn" data-copy="'+e+'" aria-label="Copiar correo de '+e+'">'+ic('copy',16)+'</button></div>'}
+  function chips(host,items,sel,cb){
+    host.innerHTML=items.map(function(it){return '<button class="chip" data-v="'+it[0]+'" aria-pressed="'+(it[0]===sel)+'">'+it[1]+'</button>'}).join('');
+    host.onclick=function(e){var b=e.target.closest('.chip');if(!b)return;$$('.chip',host).forEach(function(c){c.setAttribute('aria-pressed',c===b)});cb(b.getAttribute('data-v'))}
+  }
+  function checks(host,arr){host.innerHTML=arr.map(function(t){return '<li><span class="tick">'+ic('check',18)+'</span><span>'+t+'</span></li>'}).join('')}
+
+  /* Pestañas */
+  var counted=false;
+  function showTab(id,fromHash){
+    if(TABS.indexOf(id)<0)id='eei';
+    $$('.panel').forEach(function(p){p.classList.toggle('active',p.id==='panel-'+id)});
+    $$('.tab').forEach(function(b){var on=b.getAttribute('data-tab')===id;b.setAttribute('aria-selected',on);if(on&&b.scrollIntoView)b.scrollIntoView({inline:'center',block:'nearest'})});
+    if(!fromHash)window.scrollTo(0,0);
+    if(id==='grupo')animateCounts();
+    onScroll();
+  }
+  $$('.tab').forEach(function(b){b.addEventListener('click',function(){var id=b.getAttribute('data-tab');if(location.hash.replace('#','')===id){showTab(id)}else{location.hash=id}})});
+  window.addEventListener('hashchange',function(){showTab(location.hash.replace('#','')||'eei')});
+
+  /* Panel 1 */
+  $('#quick').innerHTML=TABS.slice(1).map(function(t){return '<button data-go="'+t+'"><span><small>'+TAB_NAMES[t][0]+'</small><strong>'+TAB_NAMES[t][1]+'</strong></span>'+ic('right',18)+'</button>'}).join('');
+  $('#quick').addEventListener('click',function(e){var b=e.target.closest('[data-go]');if(b)location.hash=b.getAttribute('data-go')});
+  checks($('#funciones-eei'),FUN_EEI);
+  var metaI=0;
+  function renderMetas(){
+    $('#meta-list').innerHTML=METAS.map(function(m,i){return '<button role="tab" data-i="'+i+'" aria-selected="'+(i===metaI)+'">'+m[0]+'</button>'}).join('');
+    $('#meta-detail').innerHTML='<p class="eyebrow">Meta '+(metaI+1)+' de '+METAS.length+'</p><h4>'+METAS[metaI][0]+'</h4><p class="txt">'+METAS[metaI][1]+'</p><div class="meta-nav"><button class="icon-btn" id="meta-prev" aria-label="Meta anterior"'+(metaI===0?' disabled':'')+'>'+ic('left',18)+'</button><button class="icon-btn" id="meta-next" aria-label="Meta siguiente"'+(metaI===METAS.length-1?' disabled':'')+'>'+ic('right',18)+'</button></div>';
+  }
+  $('#meta-list').addEventListener('click',function(e){var b=e.target.closest('[data-i]');if(b){metaI=+b.getAttribute('data-i');renderMetas()}});
+  $('#meta-detail').addEventListener('click',function(e){if(e.target.closest('#meta-prev')&&metaI>0){metaI--;renderMetas()}if(e.target.closest('#meta-next')&&metaI<METAS.length-1){metaI++;renderMetas()}});
+  renderMetas();
+
+  /* Panel 2 */
+  $('#people').innerHTML=PEOPLE.map(function(p,i){return '<div class="flip" data-flip="'+i+'"><div class="flip-inner"><div class="face front"><div class="avatar">'+p[0]+'</div><h4>'+p[1]+'</h4><span class="role">'+p[2]+'</span><span class="tag violet">'+p[3]+'</span><button class="btn btn-ghost" data-flipbtn>Ver contacto</button></div><div class="face back"><h4>'+p[1]+'</h4>'+emailRow(p[4])+'<button class="btn btn-ghost" data-flipbtn>Volver</button></div></div></div>'}).join('');
+  $('#people').addEventListener('click',function(e){var b=e.target.closest('[data-flipbtn]');if(b)b.closest('.flip').classList.toggle('flipped')});
+  checks($('#funciones-comite'),FUN_COM);
+  var novF='all',novOpen={0:true};
+  function renderNov(){
+    var html=NOV.map(function(n,i){return {n:n,i:i}}).filter(function(o){return novF==='all'||o.n.t===novF}).map(function(o){
+      var n=o.n,open=!!novOpen[o.i];
+      var body=n.s.map(function(s){return '<div class="tl-sec"><h5>'+s[0]+'</h5><ul>'+s[1].map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>'}).join('');
+      return '<li class="tl'+(open?' open':'')+'" data-i="'+o.i+'"><div class="card"><button class="tl-head" aria-expanded="'+open+'"><span class="tl-meta"><span class="tl-date">'+n.f+'</span><span class="tl-title">'+n.ti+'</span></span><span class="tl-chev">'+ic('chev',20)+'</span></button><div class="tl-body"'+(open?'':' hidden')+'>'+body+'</div></div></li>';
+    }).join('');
+    $('#timeline').innerHTML=html||'<li class="empty">No hay novedades de este tipo.</li>';
+  }
+  chips($('#nov-filters'),NOV_TYPES,'all',function(v){novF=v;renderNov()});
+  $('#timeline').addEventListener('click',function(e){var h=e.target.closest('.tl-head');if(!h)return;var li=h.closest('.tl'),i=+li.getAttribute('data-i');novOpen[i]=!novOpen[i];li.classList.toggle('open',novOpen[i]);h.setAttribute('aria-expanded',novOpen[i]);$('.tl-body',li).hidden=!novOpen[i]});
+  renderNov();
+
+  /* Panel 3 */
+  checks($('#principios-proy'),PRINC);
+  var stepI=0;
+  function renderSteps(){
+    $('#steps-nav').innerHTML=STEPS.map(function(s,i){return '<li><button role="tab" data-i="'+i+'" class="'+(i<stepI?'done':'')+'" aria-selected="'+(i===stepI)+'"><span class="num">'+(i<stepI?ic('check',16):(i+1))+'</span>'+s[0]+'</button></li>'}).join('');
+    var s=STEPS[stepI],pct=((stepI+1)/STEPS.length*100);
+    $('#step-card').innerHTML='<p class="eyebrow">Etapa '+(stepI+1)+' de '+STEPS.length+'</p><h4>'+s[0]+'</h4><p>'+s[1]+'</p>'+(s[2]?'<ul>'+s[2].map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>':'')+'<div class="bar" role="progressbar" aria-valuemin="1" aria-valuemax="'+STEPS.length+'" aria-valuenow="'+(stepI+1)+'"><i style="width:'+pct+'%"></i></div><div class="step-actions"><button class="btn btn-ghost" id="st-prev"'+(stepI===0?' disabled':'')+'>'+ic('left',16)+'Anterior</button><button class="btn btn-primary" id="st-next"'+(stepI===STEPS.length-1?' disabled':'')+'>Siguiente'+ic('right',16)+'</button></div>';
+  }
+  $('#steps-nav').addEventListener('click',function(e){var b=e.target.closest('[data-i]');if(b){stepI=+b.getAttribute('data-i');renderSteps()}});
+  $('#step-card').addEventListener('click',function(e){if(e.target.closest('#st-prev')&&stepI>0){stepI--;renderSteps()}if(e.target.closest('#st-next')&&stepI<STEPS.length-1){stepI++;renderSteps()}});
+  renderSteps();
+
+  var carSet='curso',carLine='all';
+  var track=$('#track');
+  function renderCar(){
+    var arr=PROJ[carSet].filter(function(p){return carLine==='all'||p[3]===carLine});
+    track.innerHTML=arr.length?arr.map(function(p){return '<article class="card proj"><span class="yr">'+p[0]+'</span><h4>'+p[1]+'</h4><span class="au">'+p[2]+'</span><span class="tag">'+p[3]+'</span></article>'}).join(''):'<p class="empty">No hay proyectos de esta línea en este grupo.</p>';
+    track.scrollLeft=0;carBtns();
+  }
+  function carBtns(){var max=track.scrollWidth-track.clientWidth-2;$('#car-prev').disabled=track.scrollLeft<=2;$('#car-next').disabled=track.scrollLeft>=max}
+  $('#car-prev').innerHTML=ic('left',18);$('#car-next').innerHTML=ic('right',18);
+  $('#car-prev').onclick=function(){track.scrollBy({left:-track.clientWidth*.8,behavior:reduce?'auto':'smooth'})};
+  $('#car-next').onclick=function(){track.scrollBy({left:track.clientWidth*.8,behavior:reduce?'auto':'smooth'})};
+  track.addEventListener('scroll',carBtns);window.addEventListener('resize',carBtns);
+  $('#car-seg').addEventListener('click',function(e){var b=e.target.closest('[data-set]');if(!b)return;carSet=b.getAttribute('data-set');$$('#car-seg button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});renderCar()});
+  chips($('#car-filters'),[['all','Todas las líneas']].concat(PROJ_LINES.map(function(l){return [l,l]})),'all',function(v){carLine=v;renderCar()});
+  renderCar();
+
+  /* Panel 4 */
+  $('#sem-steps').innerHTML=SEM_STEPS.map(function(s){return '<li><h4>'+s[0]+'</h4><p>'+s[1]+'</p></li>'}).join('');
+  var semLine='all',semOpen={};
+  function renderSem(){
+    var q=$('#sem-q').value.trim().toLowerCase();
+    var arr=SEM.map(function(s,i){return {s:s,i:i}}).filter(function(o){
+      var s=o.s;if(semLine!=='all'&&SEM_LINES[s[4]]!==semLine)return false;
+      return !q||(s[0]+' '+s[2]+' '+s[3]).toLowerCase().indexOf(q)>-1});
+    $('#sem-count').textContent=arr.length+(arr.length===1?' semillero':' semilleros');
+    $('#sem-grid').innerHTML=arr.length?arr.map(function(o){var s=o.s,open=!!semOpen[o.i];
+      return '<article class="card sem'+(open?' open':'')+'" data-i="'+o.i+'"><button class="sem-head" aria-expanded="'+open+'"><span><h4>'+s[0]+'</h4><span class="sem-tags"><span class="tag violet">'+s[2]+'</span><span class="tag">'+s[3]+'</span></span></span><span class="tl-chev">'+ic('chev',20)+'</span></button><div class="sem-body"'+(open?'':' hidden')+'><p>'+s[1]+'</p><span class="tag" style="justify-self:start">'+SEM_LINES[s[4]]+'</span>'+emailRow(s[5])+'</div></article>'}).join(''):'<p class="empty">Ningún semillero coincide con la búsqueda.</p>';
+  }
+  chips($('#sem-filters'),[['all','Todas las líneas']].concat(SEM_LINES.map(function(l){return [l,l]})),'all',function(v){semLine=v;renderSem()});
+  $('#sem-q').addEventListener('input',renderSem);
+  $('#sem-grid').addEventListener('click',function(e){var h=e.target.closest('.sem-head');if(!h)return;var a=h.closest('.sem'),i=+a.getAttribute('data-i');semOpen[i]=!semOpen[i];a.classList.toggle('open',semOpen[i]);h.setAttribute('aria-expanded',semOpen[i]);$('.sem-body',a).hidden=!semOpen[i]});
+  renderSem();
+
+  /* Panel 5 */
+  $('#stat-inv').setAttribute('data-count',INV.length);$('#stat-inv').textContent=INV.length;
+  $('#stat-sem').setAttribute('data-count',SEM.length);$('#stat-sem').textContent=SEM.length;
+  function animateCounts(){
+    if(reduce)return;
+    $$('#stats [data-count]').forEach(function(el){
+      var end=+el.getAttribute('data-count'),t0=null;
+      function f(t){if(!t0)t0=t;var p=Math.min((t-t0)/900,1);el.textContent=Math.round(end*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f);else el.textContent=end}
+      el.textContent=0;requestAnimationFrame(f)});
+  }
+  function renderMV(k){$('#mv-card').innerHTML='<h4>'+MV[k][0]+'</h4><p>'+MV[k][1]+'</p>'}
+  $('#mv-seg').addEventListener('click',function(e){var b=e.target.closest('[data-mv]');if(!b)return;$$('#mv-seg button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});renderMV(b.getAttribute('data-mv'))});
+  renderMV('m');
+  var dirLine='0';
+  function invCard(r){
+    var links='<a href="'+CV+r.cv+'" target="_blank" rel="noopener">CvLAC</a><a href="'+OR+r.or+'" target="_blank" rel="noopener">ORCID</a>'+(r.sc?'<a href="'+r.sc+'" target="_blank" rel="noopener">Scholar</a>':'')+(r.web?'<a href="'+r.web+'" target="_blank" rel="noopener">Website</a>':'');
+    return '<article class="card inv"><div class="inv-top"><div class="inv-avatar">'+r.i+'</div><div style="min-width:0"><span class="inv-name">'+r.n+'</span><span class="inv-prog">'+r.pr+'</span></div></div>'+emailRow(r.e)+'<p class="inv-perfil">'+r.pf+(r.cat?' Categoría <span class="tag violet">'+r.cat+'</span>':'')+'</p><div class="proys">'+r.py.map(function(p){return '<span>'+p+'</span>'}).join('')+'</div><div class="links">'+links+'</div></article>';
+  }
+  function renderDir(){
+    var q=$('#dir-q').value.trim().toLowerCase(),list,info;
+    if(q){
+      list=INV.filter(function(r){return (r.n+' '+r.pr+' '+r.pf+' '+r.py.join(' ')).toLowerCase().indexOf(q)>-1});
+      info='<p class="count">'+list.length+(list.length===1?' resultado':' resultados')+' en todas las líneas</p>';
+    }else{
+      var L=LINES[+dirLine];list=INV.filter(function(r){return r.l===+dirLine});
+      info='<h4>'+L[1]+' <span class="tag violet">'+list.length+(list.length===1?' investigador':' investigadores')+'</span></h4><p>'+L[2]+'</p>';
+    }
+    $('#line-info').innerHTML=info;
+    $('#dir-grid').innerHTML=list.length?list.map(invCard).join(''):'<p class="empty">Ningún investigador coincide con la búsqueda.</p>';
+  }
+  chips($('#dir-tabs'),LINES.map(function(l,i){return [String(i),l[0]]}),'0',function(v){dirLine=v;$('#dir-q').value='';renderDir()});
+  $('#dir-q').addEventListener('input',renderDir);
+  renderDir();
+
+  /* Formularios */
+  function fld(f){
+    var id='f-'+f.id,h='<div class="fg"><label for="'+id+'">'+f.l+'</label>';
+    if(f.t==='select')h+='<select id="'+id+'"><option value="">Selecciona...</option>'+f.o.map(function(o){return '<option>'+o+'</option>'}).join('')+'</select>';
+    else if(f.t==='area')h+='<textarea id="'+id+'" placeholder="'+(f.p||'')+'"></textarea>';
+    else h+='<input id="'+id+'" type="'+(f.t||'text')+'" '+(f.v?'value="'+f.v+'" readonly':'')+' placeholder="'+(f.p||'')+'">';
+    return h+'</div>';
+  }
+  function build(host,blocks,note,idp){
+    host.innerHTML=blocks.map(function(b){
+      if(b.sec)return '<div class="fsec">'+b.sec+'</div>';
+      if(b.row)return '<div class="frow">'+b.row.map(fld).join('')+'</div>';
+      return fld(b);
+    }).join('')+'<div class="fnote">'+note+'</div><div class="modal-actions"><button class="btn btn-primary" type="button" data-pdf>Guardar como PDF</button><button class="btn btn-ghost" type="button" data-close>Cerrar</button></div>';
+  }
+  var LN=LINES.map(function(l){return l[1]});
+  build($('#form-proyecto'),[
+    {sec:'1. Información general'},
+    {id:'p1',l:'Título preliminar del proyecto *',p:'Escribe el título tentativo de tu proyecto'},
+    {row:[{id:'p2',l:'Investigador principal *',p:'Nombre completo'},{id:'p3',l:'Programa académico *',p:'Ej. Lic. en Educación Infantil'}]},
+    {row:[{id:'p4',l:'Tipo de investigación *',t:'select',o:['Básica','Aplicada']},{id:'p5',l:'Modalidad *',t:'select',o:['Investigación docente','Semillero']}]},
+    {sec:'2. Contenido académico'},
+    {id:'p6',l:'Objetivo general del proyecto *',t:'area',p:'Describe el objetivo principal que orientará la investigación...'},
+    {id:'p7',l:'Articulación con las líneas del grupo EIS *',t:'select',o:LN},
+    {id:'p8',l:'Justificación de la articulación con la línea *',t:'area',p:'Explica cómo el proyecto se articula con la línea de investigación seleccionada...'},
+    {id:'p9',l:'Articulación con las metas del programa *',t:'area',p:'Describe cómo el proyecto contribuye al plan de investigaciones y metas del programa...'},
+    {sec:'3. Requisitos mínimos'},
+    {id:'p10',l:'Equipo de investigación *',t:'area',p:'Lista los integrantes del equipo (nombre, rol, vinculación)...'},
+    {id:'p11',l:'Producción mínima comprometida *',t:'area',p:'Describe los productos de nuevo conocimiento comprometidos...'},
+    {sec:'4. Cronograma estimado'},
+    {row:[{id:'p12',l:'Fecha de inicio estimada *',t:'month'},{id:'p13',l:'Fecha de finalización estimada *',t:'month'}]},
+    {id:'p14',l:'Descripción del cronograma por fases',t:'area',p:'Describe brevemente las fases del proyecto...'},
+    {sec:'5. Grupo de investigación'},
+    {row:[{id:'p15',l:'Grupo al que se vincula *',v:'Educación, Innovación y Sociedad (EIS)'},{id:'p16',l:'Código del grupo',v:'COL0200112'}]},
+    {id:'p17',l:'¿El investigador principal tiene CvLAC activo?',t:'select',o:['Sí','No, estoy en proceso de creación','No aplica']},
+    {id:'p18',l:'Observaciones adicionales',t:'area',p:'Cualquier información adicional relevante para el comité...'}
+  ],'Para guardar este formulario como PDF: botón Guardar como PDF, o menú del navegador, Imprimir, Guardar como PDF.');
+  build($('#form-semillero'),[
+    {id:'s1',l:'Nombre del semillero *',p:'Nombre del semillero'},
+    {row:[{id:'s2',l:'Escuela *',v:'Escuela de Educación e Innovación'},{id:'s3',l:'Programa académico *',p:'Ej. Lic. en Educación Infantil'}]},
+    {row:[{id:'s4',l:'Líder *',p:'Nombre completo del docente líder'},{id:'s5',l:'ODS al que impacta *',p:'Ej. ODS 4, Educación de calidad'}]},
+    {row:[{id:'s6',l:'Grupo de investigación *',v:'Educación, Innovación y Sociedad (EIS)'},{id:'s7',l:'Línea de investigación *',t:'select',o:LN}]},
+    {id:'s8',l:'Objetivo del semillero *',t:'area',p:'Describe el objetivo principal del semillero...'},
+    {id:'s9',l:'Justificación *',t:'area',p:'Describe cómo el semillero aporta al plan de estudios del programa e indica los aportes al campo de conocimiento...'}
+  ],'Completa los campos y haz clic en Guardar como PDF para imprimir.');
+
+  var lastOpener=null;
+  function openModal(id,opener){lastOpener=opener||null;var m=document.getElementById(id);m.classList.add('open');document.body.style.overflow='hidden';var c=$('[data-close]',m);if(c)c.focus()}
+  function closeModals(){$$('.overlay.open').forEach(function(m){m.classList.remove('open')});document.body.style.overflow='';if(lastOpener)lastOpener.focus()}
+  $$('.modal-close').forEach(function(b){b.innerHTML=ic('close',18)});
+  $$('.overlay').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o)closeModals()})});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModals()});
+
+  function printForm(modal){
+    var spans=[];
+    $$('input,textarea,select',modal).forEach(function(f){var sp=document.createElement('span');sp.className='print-valor';sp.textContent=f.value||'-';f.parentNode.insertBefore(sp,f.nextSibling);spans.push(sp)});
+    setTimeout(function(){window.print();spans.forEach(function(sp){sp.remove()})},250);
+  }
+  /* Delegación global */
+  document.addEventListener('click',function(e){
+    var c=e.target.closest('[data-copy]');if(c){copyText(c.getAttribute('data-copy'));return}
+    var o=e.target.closest('[data-open]');if(o){openModal(o.getAttribute('data-open'),o);return}
+    if(e.target.closest('[data-close]')){closeModals();return}
+    var pd=e.target.closest('[data-pdf]');if(pd){printForm(pd.closest('.overlay'));return}
+  });
+
+  /* Scroll */
+  var tick=false,prog=$('#progress'),top=$('#to-top');
+  top.innerHTML=ic('up',20);
+  top.addEventListener('click',function(){window.scrollTo({top:0,behavior:reduce?'auto':'smooth'})});
+  function onScroll(){
+    var h=document.documentElement.scrollHeight-window.innerHeight,y=window.scrollY||0;
+    prog.style.transform='scaleX('+(h>0?Math.min(y/h,1):0)+')';
+    top.classList.toggle('show',y>700);
+  }
+  window.addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(function(){tick=false;onScroll()})}},{passive:true});
+
+  fillIcons(document);
+  showTab(location.hash.replace('#','')||'eei',true);
+})();
+</script>
+</body>
+</html>
